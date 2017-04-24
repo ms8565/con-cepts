@@ -8,9 +8,8 @@ let answers = [];
 let question = "Question text";
 let ansNum = 0;
 
-//handler for mouse clicks
-const clickHandler = (e) => {
-    console.log("x: " + e.x + ", y: " + e.y);
+const onMouseDown = (e) => {
+  console.log("x: " + e.x + ", y: " + e.y);
     var choice;
     if(e.x >= 563 && e.y >= 271 && e.x <= 843 && e.y <= 370){
             console.log("answer 0");
@@ -33,11 +32,13 @@ const clickHandler = (e) => {
         draw();
     }
     socket.emit("pick", choice);
-};
+}
 
 const init = () => {
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
+  
+  canvas.onmousedown = onMouseDown;
   
   socket = io.connect();
 
@@ -51,7 +52,7 @@ const init = () => {
       draw();
   });
     
-    document.body.addEventListener('mouseup', clickHandler);
+    
 };
 
 

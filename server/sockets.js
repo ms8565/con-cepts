@@ -1,3 +1,5 @@
+
+
 // fast hashing library
 const xxh = require('xxhashjs');
 // Player class
@@ -11,24 +13,24 @@ const rooms = {};
 // our socketio instance
 let io;
 
-//demo junk
-let currentQuestion = "What is the best kind of graph?";
-let currentAnswers = ["shape","blue","applesause", "bargraph"];
-let currentAnsNum = 3;
+// demo junk
+const currentQuestion = 'What is the best kind of graph?';
+const currentAnswers = ['shape', 'blue', 'applesause', 'bargraph'];
+const currentAnsNum = 3;
 
-//Add new user to a room
+// Add new user to a room
 const addUserToRoom = (sock) => {
   const socket = sock;
-    
-    const roomName = "room1";
-    socket.roomName = roomName;
-    rooms[roomName] = new Room(roomName);
-  /*let added = false;
+
+  const roomName = 'room1';
+  socket.roomName = roomName;
+  rooms[roomName] = new Room(roomName);
+  /* let added = false;
 
   const keys = Object.keys(rooms);
 
   for (let i = 0; i < keys.length; i++) {
-    
+
     // Check if a room has an open spot
     if (rooms[keys[i]].numUsers < 2) {
       socket.roomName = keys[i];
@@ -44,6 +46,13 @@ const addUserToRoom = (sock) => {
     socket.roomName = roomName;
     rooms[roomName] = new Room(roomName);
   }*/
+};
+
+const updateRound = () => {
+  console.log('updating');
+  const data = { question: currentQuestion, answers: currentAnswers, ansNum: currentAnsNum };
+
+  io.sockets.in('room1').emit('drawRound', data);
 };
 
 // setup socket server
@@ -74,12 +83,12 @@ const setupSockets = (ioServer) => {
 
     // emit joined event to the user
     socket.emit('joined', room.players[hash]);
-      
-      //calling update round now for testing
-      updateRound();
-      
+
+      // calling update round now for testing
+    updateRound();
+
     socket.on('pick', (choice) => {
-        console.log("choice: " + choice);
+      console.log(`choice: ${choice}`);
     });
 
     socket.on('disconnect', () => {
@@ -97,15 +106,6 @@ const setupSockets = (ioServer) => {
       socket.leave(socket.roomName);
     });
   });
-    
-    const updateRound = () =>{
-        console.log("updating");
-        let data = {question : currentQuestion, answers : currentAnswers, ansNum : currentAnsNum};
-        
-        io.sockets.in('room1').emit('drawRound', data);
-    };
-    
-    
 };
 
 module.exports.setupSockets = setupSockets;

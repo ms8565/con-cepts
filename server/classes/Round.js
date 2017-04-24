@@ -1,9 +1,12 @@
+
+const demoQuest = ['', '', ''];
+const demoAns = ['', '', ''];
+
 class Round {
-    
-let demoQuest = ["","",""];
-let demoAns = ["", "", ""];
+
+
   constructor(answers, players) {
-    var questNum = Math.floor(Math.random * 4);
+    const questNum = Math.floor(Math.random * 4);
     this.quest = demoQuest[questNum];
     this.answers = answers;
     this.ansNum = questNum;
