@@ -1,11 +1,15 @@
 class Round {
-  constructor(quest, answers, players, correctAns) {
-    this.quest = quest;
+    
+let demoQuest = ["","",""];
+let demoAns = ["", "", ""];
+  constructor(answers, players) {
+    var questNum = Math.floor(Math.random * 4);
+    this.quest = demoQuest[questNum];
     this.answers = answers;
-    this.ansNum = 1;
-    this.correctAns = correctAns;
+    this.ansNum = questNum;
+    this.correctAns = demoAns[questNum];
     this.players = players;
   }
 }
 
-module.exports = Answer;
+module.exports = Round;
