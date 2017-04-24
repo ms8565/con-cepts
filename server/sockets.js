@@ -14,7 +14,10 @@ let io;
 //Add new user to a room
 const addUserToRoom = (sock) => {
   const socket = sock;
-
+    
+    const roomName = "room1";
+    socket.roomName = roomName;
+    rooms[roomName] = new Room(roomName);
   /*let added = false;
 
   const keys = Object.keys(rooms);

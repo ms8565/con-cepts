@@ -1,7 +1,8 @@
 const draw = () => {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    ctx.fillStyle("#216800");
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   
 
 

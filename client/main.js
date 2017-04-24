@@ -3,6 +3,8 @@ let ctx;
 let socket; 
 let hash;
 
+let players = [];
+
 
 const init = () => {
   canvas = document.querySelector('#canvas');
@@ -11,6 +13,8 @@ const init = () => {
   socket = io.connect();
 
   socket.on('joined', addUser); 
+    
+  
 };
 
 
