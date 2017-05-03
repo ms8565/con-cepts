@@ -115,7 +115,7 @@ var onAnswerSubmit = function onAnswerSubmit() {
   var answerInput = document.getElementById("answer-input").value;
 
   //Send submitted answer text to server
-  socket.emit('submitAnswerText', { answer: onAnswerSubmit });
+  socket.emit('submitAnswerText', { answer: answerInput });
   //Wait for other players to finish
   changeState(APP_STATES.ROUND_WAIT);
 };

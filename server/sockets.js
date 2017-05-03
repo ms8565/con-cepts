@@ -6,6 +6,10 @@ const xxh = require('xxhashjs');
 const Player = require('./classes/Player.js');
 // Room class
 const Room = require('./classes/Room.js');
+// Round class
+const Round = require('./classes/Round.js');
+// Answer class
+const Answer = require('./classes/Answer.js');
 
 // List of player rooms
 const rooms = {};
@@ -14,10 +18,14 @@ const rooms = {};
 let io;
 
 // demo junk
-const currentQuestion = 'What is the best kind of graph?';
-const currentAnswers = ['shape', 'blue', 'applesause', 'bargraph'];
-const currentAnsNum = 3;
-// const currentRound = 1;
+const demoQuestion = 'What is the best kind of graph?';
+const demoAnswer = 'bar graph';
+
+const rounds = [];
+const currentRound = 0;
+rounds.push(new Round('question', 'answer'));
+rounds.push(new Round(demoQuestion, demoAnswer));
+
 
 const APP_STATES = {
   LOGIN: 1,
@@ -34,11 +42,13 @@ let currentState = APP_STATES.LOGIN_WAIT;
 
 const changeState = (newState) => {
   currentState = newState;
+  const currentQuestion = rounds[currentRound].question;
+  const currentAnswers = rounds[currentRound].answers;
   let data;
 
 
   switch (currentState) {
-    case APP_STATES.GAME_START:
+    case APP_STATES.GAME_START: {
       // Tell all users to start the game and show onboarding
       io.sockets.in('room1').emit('changeState', currentState);
 
@@ -48,19 +58,20 @@ const changeState = (newState) => {
       }, 1000);
 
       break;
-    case APP_STATES.ROUND_START:
+    }
+    case APP_STATES.ROUND_START: {
       // Tell all users to start the round, send them the current question
       data = { newState: currentState, question: currentQuestion };
       io.sockets.in('room1').emit('changeState', data);
 
       setTimeout(() => {
         changeState(APP_STATES.SHOW_CHOICES);
-      }, 10000);
+      }, 5000);
 
       break;
-    case APP_STATES.ROUND_END:
+    }
+    case APP_STATES.ROUND_END: {
       // Send the users the point totals
-      // Send current state, ROUND_END
       io.sockets.in('room1').emit('changeState', currentState);
 
       // After 10 seconds, start the next round
@@ -69,11 +80,20 @@ const changeState = (newState) => {
       }, 1000);
 
       break;
-    case APP_STATES.SHOW_CHOICES:
+    }
+    case APP_STATES.SHOW_CHOICES: {
+      // shuffle round answers
+      const newAnswer = new Answer('ANSWER', rounds[currentRound].correctAnswer);
+      rounds[currentRound].answers.push(newAnswer);
+
+      // Get authorless answers
+      const choices = currentAnswers.map((answer) => answer.text);
+
       // Send users the entered answers
-      data = { newState: currentState, question: currentQuestion, answers: currentAnswers };
+      data = { newState: currentState, question: currentQuestion, answers: choices };
       io.sockets.in('room1').emit('changeState', data);
       break;
+    }
     case APP_STATES.GAME_END:
 
       break;
@@ -141,8 +161,13 @@ const setupSockets = (ioServer) => {
     // emit joined event to the user
     socket.emit('joined', room.players[hash]);
 
-    socket.on('pick', (choice) => {
+    socket.on('chooseAnswerNum', (choice) => {
+      rounds[currentRound].answers[choice].pickedBy.push(socket.hash);
       console.log(`choice: ${choice}`);
+    });
+    socket.on('submitAnswerText', (data) => {
+      const answer = new Answer(socket.hash, data.answer);
+      rounds[currentRound].answers.push(answer);
     });
     socket.on('changeState', (data) => {
       changeState(data.newState);
