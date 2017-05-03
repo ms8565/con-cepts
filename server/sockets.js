@@ -42,8 +42,11 @@ let currentState = APP_STATES.LOGIN_WAIT;
 
 const changeState = (newState) => {
   currentState = newState;
+    console.log("current state: " + currentState);
+
   const currentQuestion = rounds[currentRound].question;
   const currentAnswers = rounds[currentRound].answers;
+    
   let data;
 
 
@@ -73,11 +76,16 @@ const changeState = (newState) => {
       rounds[currentRound].answers[rounds[currentRound].correctIndex].pickedBy.forEach(function(e){
           rooms["room1"].players[e].score += 100;
       })
+      data = { newState: currentState, question: currentQuestion };
+      //io.sockets.in('room1').emit('changeState', data);
         
-      currentRound++;
       // After 10 seconds, start the next round
       setTimeout(() => {
-        changeState(APP_STATES.ROUND_START);
+          if(rounds[currentRound+1] != null){
+              currentRound++;
+              changeState(APP_STATES.ROUND_START);
+          }
+          else changeState(APP_STATES.GAME_END);
       }, 1000);
 
       break;
