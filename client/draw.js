@@ -1,4 +1,11 @@
-const draw = () => {
+const drawQuestion = () => {
+  
+}
+const drawOptions = () => {
+  
+}
+
+const drawRound = () => {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#216800";

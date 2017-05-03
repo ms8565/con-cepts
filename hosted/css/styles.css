@@ -1,0 +1,31 @@
+.answers{
+  width:90%;
+  margin:auto;
+}
+.answer-btn {
+  display:block;
+  margin: 1em 0 1em 0;
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+  width:100%;
+  padding-top: .75em;
+  padding-bottom:.75em;
+}
+.answer-btn:focus,
+.answer-btn.focus {
+  color: #fff;
+  background-color: #286090;
+  border-color: #122b40;
+}
+.answer-btn:hover {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+.answer-btn:active,
+.answer-btn.active{
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+}

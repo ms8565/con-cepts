@@ -17,6 +17,70 @@ let io;
 const currentQuestion = 'What is the best kind of graph?';
 const currentAnswers = ['shape', 'blue', 'applesause', 'bargraph'];
 const currentAnsNum = 3;
+// const currentRound = 1;
+
+const APP_STATES = {
+  LOGIN: 1,
+  LOGIN_WAIT: 2,
+  GAME_START: 3,
+  ROUND_START: 4,
+  ROUND_WAIT: 5,
+  SHOW_CHOICES: 6,
+  ROUND_END: 7,
+  GAME_END: 8,
+};
+
+let currentState = APP_STATES.LOGIN_WAIT;
+
+const changeState = (newState) => {
+  currentState = newState;
+  let data;
+
+
+  switch (currentState) {
+    case APP_STATES.GAME_START:
+      // Tell all users to start the game and show onboarding
+      io.sockets.in('room1').emit('changeState', currentState);
+
+      // After 10 seconds, start the first round
+      setTimeout(() => {
+        changeState(APP_STATES.ROUND_START);
+      }, 1000);
+
+      break;
+    case APP_STATES.ROUND_START:
+      // Tell all users to start the round, send them the current question
+      data = { newState: currentState, question: currentQuestion };
+      io.sockets.in('room1').emit('changeState', data);
+
+      setTimeout(() => {
+        changeState(APP_STATES.SHOW_CHOICES);
+      }, 10000);
+
+      break;
+    case APP_STATES.ROUND_END:
+      // Send the users the point totals
+      // Send current state, ROUND_END
+      io.sockets.in('room1').emit('changeState', currentState);
+
+      // After 10 seconds, start the next round
+      setTimeout(() => {
+        changeState(APP_STATES.ROUND_START);
+      }, 1000);
+
+      break;
+    case APP_STATES.SHOW_CHOICES:
+      // Send users the entered answers
+      data = { newState: currentState, question: currentQuestion, answers: currentAnswers };
+      io.sockets.in('room1').emit('changeState', data);
+      break;
+    case APP_STATES.GAME_END:
+
+      break;
+    default:
+      break;
+  }
+};
 
 // Add new user to a room
 const addUserToRoom = (sock) => {
@@ -48,13 +112,6 @@ const addUserToRoom = (sock) => {
   }*/
 };
 
-const updateRound = () => {
-  console.log('updating');
-  const data = { question: currentQuestion, answers: currentAnswers, ansNum: currentAnsNum };
-
-  io.sockets.in('room1').emit('drawRound', data);
-};
-
 // setup socket server
 const setupSockets = (ioServer) => {
   // set our io server instance
@@ -84,11 +141,11 @@ const setupSockets = (ioServer) => {
     // emit joined event to the user
     socket.emit('joined', room.players[hash]);
 
-      // calling update round now for testing
-    updateRound();
-
     socket.on('pick', (choice) => {
       console.log(`choice: ${choice}`);
+    });
+    socket.on('changeState', (data) => {
+      changeState(data.newState);
     });
 
     socket.on('disconnect', () => {
