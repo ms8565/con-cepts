@@ -25,6 +25,12 @@ const rounds = [];
 let currentRound = 0;
 rounds.push(new Round('question', 'answer'));
 rounds.push(new Round(demoQuestion, demoAnswer));
+rounds.push(new Round("what is the only fully evolved fire type not to learn solar beam?", "Flareon"));
+rounds.push(new Round("do you like jazz?", "yes"));
+rounds.push(new Round("can I sleep yet?", "probably not, more questions to write"));
+rounds.push(new Round("what is the meaning of life?", "hope y'all come up with a better answer than I did"));
+rounds.push(new Round("what does a $7 root beer taste like?", "about $5 worth of root beer"));
+rounds.push(new Round("Die Geschichte vom Daumenlutscher?", "in schnellem Lauf Springt der Schneider"));
 
 
 const APP_STATES = {
