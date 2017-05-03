@@ -57,28 +57,16 @@ const drawRoundStart = (question) => {
 
 //Display waiting screen while other players answer
 const drawRoundWait = () => {
-  let contentBox = document.querySelector('#state-content');
-  //Clear content box
+  let contentBox = document.querySelector('#answers');
   contentBox.innerHTML = "PLEASE WAIT FOR ROUND TO FINISH";
 };
 
 //Display submitted choices and allow player to choose one
 const drawShowChoices = (question, answers) => {
   
-  let contentBox = document.querySelector('#state-content');
-  //Clear content box
-  contentBox.innerHTML = "";
-  
-  //Add the question
-  let questionElement = document.createElement("H3");
-  questionElement.setAttribute("id", "question");
-  let questionText = document.createTextNode(question);
-  questionElement.appendChild(questionText);
-  contentBox.appendChild(questionElement);
-  
   //Add all of the answer buttons
-  let answersElement = document.createElement("div");
-  answersElement.setAttribute("id", "answers");
+  let answersElement = document.querySelector('#answers');
+  answersElement.innerHTML = "";
   
   for(let i = 0; i < answers.length; i++){
     let answerBtn = document.createElement("BUTTON");
@@ -96,13 +84,28 @@ const drawShowChoices = (question, answers) => {
     answersElement.appendChild(answerBtn);
   }
   
-  //Add answers box to content box
-  contentBox.appendChild(answersElement);
 };
 
 //Display correct answer and player points
-const drawRoundEnd = () => {
+const drawRoundEnd = (answers, players) => {
+  let answersElement = document.querySelector('#answers');
+  answersElement.innerHTML = "";
   
+  for(let i = 0; i < answers.length; i++){
+    let answerSection = document.createElement("div");
+    answerSection.innerHTML += "<h4>"+answers[i].text+"</h4>";
+    answerSection.innerHTML += "<p>"+answers[i].author+"</p>"
+    answersElement.appendChild(answerSection);
+    
+  }
+  answersElement.innerHTML+="<hr/>";
+  
+  console.log('players: '+JSON.stringify(players));
+  const keys = Object.keys(players);
+  for(let i = 0; i < keys.length; i++){
+    let player = players[keys[i]];
+    answersElement.innerHTML += "<h4>"+player.hash+": "+player.score+" points</h4>";
+  }
 };
 
 //Display player point totals

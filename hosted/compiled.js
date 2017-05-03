@@ -1,124 +1,4 @@
-"use strict";
-
-var drawQuestion = function drawQuestion() {};
-var drawOptions = function drawOptions() {};
-
-var drawRound = function drawRound() {
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#216800";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.font = "30px Architects Daughter";
-
-  ctx.fillStyle = "#6eb74d";
-  ctx.fillRect(250, 30, 480, 100);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(question, 260, 85);
-
-  ctx.fillStyle = "#6eb74d";
-  ctx.fillRect(100, 180, 280, 100);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(answers[0], 110, 230);
-
-  ctx.fillStyle = "#6eb74d";
-  ctx.fillRect(100, 350, 280, 100);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(answers[1], 110, 400);
-
-  ctx.fillStyle = "#6eb74d";
-  ctx.fillRect(630, 180, 280, 100);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(answers[2], 640, 230);
-
-  ctx.fillStyle = "#6eb74d";
-  ctx.fillRect(630, 350, 280, 100);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(answers[3], 640, 400);
-};
-
-//looping with requestAnimationFrame
-var drawContinuous = function drawContinuous(time) {
-
-  //call next animation frame
-  animationFrame = requestAnimationFrame(draw);
-};
-"use strict";
-
-var canvas = void 0;
-var ctx = void 0;
-var socket = void 0;
-var hash = void 0;
-
-var players = [];
-var answers = [];
-var question = "Question text";
-var ansNum = 0;
-
-var APP_STATES = {
-  LOGIN: 1,
-  LOGIN_WAIT: 2,
-  GAME_START: 3,
-  ROUND_START: 4,
-  ROUND_WAIT: 5,
-  SHOW_CHOICES: 6,
-  ROUND_END: 7,
-  GAME_END: 8
-};
-
-var currentState = APP_STATES.LOGIN;
-
-var changeState = function changeState(newState, data) {
-  currentState = newState;
-
-  switch (currentState) {
-    case APP_STATES.LOGIN_WAIT:
-      drawLoginWait();
-      break;
-    case APP_STATES.GAME_START:
-      drawGameStart();
-      break;
-    case APP_STATES.ROUND_START:
-      drawRoundStart(data.question);
-      break;
-    case APP_STATES.ROUND_WAIT:
-      drawRoundWait();
-      break;
-    case APP_STATES.ROUND_END:
-      drawRoundEnd();
-      break;
-    case APP_STATES.SHOW_CHOICES:
-      drawShowChoices(data.question, data.answers);
-      break;
-    case APP_STATES.GAME_END:
-      drawGameEnd();
-      break;
-
-  }
-};
-
-var onStartClick = function onStartClick(e) {
-  var state = APP_STATES.GAME_START;
-  socket.emit('changeState', { newState: state });
-};
-
-var onAnswerClick = function onAnswerClick(e) {
-  var questionNum = e.target.value;
-  console.log("Question num is: " + questionNum);
-
-  //Send chosen answer to server
-  socket.emit('chooseAnswerNum', { question: questionNum });
-  //Wait for other players to finish
-  changeState(APP_STATES.ROUND_WAIT);
-};
-var onAnswerSubmit = function onAnswerSubmit() {
-  var answerInput = document.getElementById("answer-input").value;
-
-  //Send submitted answer text to server
-  socket.emit('submitAnswerText', { answer: answerInput });
-  //Wait for other players to finish
-  changeState(APP_STATES.ROUND_WAIT);
-};
+'use strict';
 
 var drawLoginWait = function drawLoginWait() {
   console.log('test');
@@ -179,28 +59,16 @@ var drawRoundStart = function drawRoundStart(question) {
 
 //Display waiting screen while other players answer
 var drawRoundWait = function drawRoundWait() {
-  var contentBox = document.querySelector('#state-content');
-  //Clear content box
+  var contentBox = document.querySelector('#answers');
   contentBox.innerHTML = "PLEASE WAIT FOR ROUND TO FINISH";
 };
 
 //Display submitted choices and allow player to choose one
 var drawShowChoices = function drawShowChoices(question, answers) {
 
-  var contentBox = document.querySelector('#state-content');
-  //Clear content box
-  contentBox.innerHTML = "";
-
-  //Add the question
-  var questionElement = document.createElement("H3");
-  questionElement.setAttribute("id", "question");
-  var questionText = document.createTextNode(question);
-  questionElement.appendChild(questionText);
-  contentBox.appendChild(questionElement);
-
   //Add all of the answer buttons
-  var answersElement = document.createElement("div");
-  answersElement.setAttribute("id", "answers");
+  var answersElement = document.querySelector('#answers');
+  answersElement.innerHTML = "";
 
   for (var i = 0; i < answers.length; i++) {
     var answerBtn = document.createElement("BUTTON");
@@ -217,16 +85,114 @@ var drawShowChoices = function drawShowChoices(question, answers) {
 
     answersElement.appendChild(answerBtn);
   }
-
-  //Add answers box to content box
-  contentBox.appendChild(answersElement);
 };
 
 //Display correct answer and player points
-var drawRoundEnd = function drawRoundEnd() {};
+var drawRoundEnd = function drawRoundEnd(answers, players) {
+  var answersElement = document.querySelector('#answers');
+  answersElement.innerHTML = "";
+
+  for (var i = 0; i < answers.length; i++) {
+    var answerSection = document.createElement("div");
+    answerSection.innerHTML += "<h4>" + answers[i].text + "</h4>";
+    answerSection.innerHTML += "<p>" + answers[i].author + "</p>";
+    answersElement.appendChild(answerSection);
+  }
+  answersElement.innerHTML += "<hr/>";
+
+  console.log('players: ' + JSON.stringify(players));
+  var keys = Object.keys(players);
+  for (var _i = 0; _i < keys.length; _i++) {
+    var player = players[keys[_i]];
+    answersElement.innerHTML += "<h4>" + player.hash + ": " + player.score + " points</h4>";
+  }
+};
 
 //Display player point totals
 var drawGameEnd = function drawGameEnd() {};
+
+//looping with requestAnimationFrame
+var drawContinuous = function drawContinuous(time) {
+
+  //call next animation frame
+  animationFrame = requestAnimationFrame(draw);
+};
+"use strict";
+
+var canvas = void 0;
+var ctx = void 0;
+var socket = void 0;
+var hash = void 0;
+
+var players = [];
+var answers = [];
+var question = "Question text";
+var ansNum = 0;
+
+var APP_STATES = {
+  LOGIN: 1,
+  LOGIN_WAIT: 2,
+  GAME_START: 3,
+  ROUND_START: 4,
+  ROUND_WAIT: 5,
+  SHOW_CHOICES: 6,
+  ROUND_END: 7,
+  GAME_END: 8
+};
+
+var currentState = APP_STATES.LOGIN;
+
+var changeState = function changeState(newState, data) {
+  currentState = newState;
+
+  switch (currentState) {
+    case APP_STATES.LOGIN_WAIT:
+      drawLoginWait();
+      break;
+    case APP_STATES.GAME_START:
+      drawGameStart();
+      break;
+    case APP_STATES.ROUND_START:
+      drawRoundStart(data.question);
+      break;
+    case APP_STATES.ROUND_WAIT:
+      drawRoundWait();
+      break;
+    case APP_STATES.ROUND_END:
+      drawRoundEnd(data.answers, data.players);
+      break;
+    case APP_STATES.SHOW_CHOICES:
+      drawShowChoices(data.question, data.answers);
+      break;
+    case APP_STATES.GAME_END:
+      drawGameEnd();
+      break;
+
+  }
+};
+
+var onStartClick = function onStartClick(e) {
+  var state = APP_STATES.GAME_START;
+  socket.emit('changeState', { newState: state });
+};
+
+var onAnswerClick = function onAnswerClick(e) {
+  var questionNum = e.target.value;
+  console.log("Question num is: " + questionNum);
+
+  //Send chosen answer to server
+  socket.emit('chooseAnswerNum', { question: questionNum });
+  //Wait for other players to finish
+  changeState(APP_STATES.ROUND_WAIT);
+};
+var onAnswerSubmit = function onAnswerSubmit() {
+  var answerInput = document.getElementById("answer-input").value;
+
+  //Send submitted answer text to server
+  socket.emit('submitAnswerText', { answer: answerInput });
+  //Wait for other players to finish
+  changeState(APP_STATES.ROUND_WAIT);
+};
 
 var setupCanvas = function setupCanvas() {
   canvas = document.querySelector('#canvas');
@@ -247,7 +213,6 @@ var init = function init() {
     ansNum = data.ansNum;
 
     drawRoundStart();
-    //drawRound();
   });
 
   socket.on('changeState', function (data) {

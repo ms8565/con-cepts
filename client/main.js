@@ -38,7 +38,7 @@ const changeState = (newState, data) => {
       drawRoundWait();
       break;
     case APP_STATES.ROUND_END:
-      drawRoundEnd();
+      drawRoundEnd(data.answers, data.players);
       break;
     case APP_STATES.SHOW_CHOICES:
       drawShowChoices(data.question, data.answers);

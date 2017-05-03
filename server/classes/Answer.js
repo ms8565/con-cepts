@@ -8,11 +8,5 @@ class Answer {
   }
 }
 
-/* const getAnswerValues = () => {
-  var doubles = numbers.map(function(answer) {
-  return answer.text;
-});
-};*/
-
 
 module.exports = Answer;

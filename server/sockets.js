@@ -25,12 +25,17 @@ const rounds = [];
 let currentRound = 0;
 rounds.push(new Round('question', 'answer'));
 rounds.push(new Round(demoQuestion, demoAnswer));
-rounds.push(new Round("what is the only fully evolved fire type not to learn solar beam?", "Flareon"));
-rounds.push(new Round("do you like jazz?", "yes"));
-rounds.push(new Round("can I sleep yet?", "probably not, more questions to write"));
-rounds.push(new Round("what is the meaning of life?", "hope y'all come up with a better answer than I did"));
-rounds.push(new Round("what does a $7 root beer taste like?", "about $5 worth of root beer"));
-rounds.push(new Round("Die Geschichte vom Daumenlutscher?", "in schnellem Lauf Springt der Schneider"));
+rounds.push(new Round('what is the only fully evolved fire type not to learn solar beam?',
+                      'Flareon'));
+rounds.push(new Round('do you like jazz?', 'yes'));
+rounds.push(new Round('can I sleep yet?',
+                      'probably not, more questions to write'));
+rounds.push(new Round('what is the meaning of life?',
+                      "hope y'all come up with a better answer than I did"));
+rounds.push(new Round('what does a $7 root beer taste like?',
+                      'about $5 worth of root beer'));
+rounds.push(new Round('Die Geschichte vom Daumenlutscher?',
+                      'in schnellem Lauf Springt der Schneider'));
 
 
 const APP_STATES = {
@@ -48,11 +53,11 @@ let currentState = APP_STATES.LOGIN_WAIT;
 
 const changeState = (newState) => {
   currentState = newState;
-    console.log("current state: " + currentState);
+  console.log(`current state: ${currentState}`);
 
   const currentQuestion = rounds[currentRound].question;
   const currentAnswers = rounds[currentRound].answers;
-    
+
   let data;
 
 
@@ -72,27 +77,30 @@ const changeState = (newState) => {
       // Tell all users to start the round, send them the current question
       data = { newState: currentState, question: currentQuestion };
       io.sockets.in('room1').emit('changeState', data);
-      
+
       break;
     }
     case APP_STATES.ROUND_END: {
       // Send the users the point totals
-      io.sockets.in('room1').emit('changeState', currentState);
-        
-      rounds[currentRound].answers[rounds[currentRound].correctIndex].pickedBy.forEach(function(e){
-          rooms["room1"].players[e].score += 100;
-      })
-      data = { newState: currentState, question: currentQuestion };
-      //io.sockets.in('room1').emit('changeState', data);
-        
+      // io.sockets.in('room1').emit('changeState', currentState);
+
+      rounds[currentRound].answers[rounds[currentRound].correctIndex].pickedBy.forEach((e) => {
+        rooms.room1.players[e].score += 100;
+      });
+      data = {
+        newState: currentState,
+        players: rooms.room1.players,
+        answers: rounds[currentRound].answers,
+      };
+      io.sockets.in('room1').emit('changeState', data);
+
       // After 10 seconds, start the next round
       setTimeout(() => {
-          if(rounds[currentRound+1] != null){
-              currentRound++;
-              changeState(APP_STATES.ROUND_START);
-          }
-          else changeState(APP_STATES.GAME_END);
-      }, 1000);
+        if (rounds[currentRound + 1] != null) {
+          currentRound++;
+          changeState(APP_STATES.ROUND_START);
+        } else changeState(APP_STATES.GAME_END);
+      }, 10000);
 
       break;
     }
@@ -123,9 +131,9 @@ const addUserToRoom = (sock) => {
 
   const roomName = 'room1';
   socket.roomName = roomName;
-    if(rooms[roomName] == null){
-        rooms[roomName] = new Room(roomName);
-    }
+  if (rooms[roomName] == null) {
+    rooms[roomName] = new Room(roomName);
+  }
   /* let added = false;
 
   const keys = Object.keys(rooms);
@@ -179,15 +187,17 @@ const setupSockets = (ioServer) => {
 
     socket.on('chooseAnswerNum', (data) => {
       rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);
-        rounds[currentRound].unanswered--;
-        if(rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
+      rounds[currentRound].unanswered--;
+      if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
       console.log(`choice: ${data.question}`);
     });
     socket.on('submitAnswerText', (data) => {
       const answer = new Answer(socket.hash, data.answer);
       rounds[currentRound].answers.push(answer);
-        rounds[currentRound].unanswered++;
-        if(rounds[currentRound].unanswered == Object.keys(rooms["room1"].players).length) changeState(APP_STATES.SHOW_CHOICES);
+      rounds[currentRound].unanswered++;
+      if (rounds[currentRound].unanswered === Object.keys(rooms.room1.players).length) {
+        changeState(APP_STATES.SHOW_CHOICES);
+      }
     });
     socket.on('changeState', (data) => {
       changeState(data.newState);

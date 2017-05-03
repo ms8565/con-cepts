@@ -4,8 +4,8 @@
 class Player {
   constructor(hash) {
     this.hash = hash; // character's unique id
-      
-    this.score = 0;//player score
+
+    this.score = 0;// player score
 
     // last time this character was updated
     this.lastUpdate = new Date().getTime();
