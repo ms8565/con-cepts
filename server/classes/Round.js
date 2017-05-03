@@ -7,6 +7,7 @@ class Round {
     this.correctAnswer = answer;
     this.correctIndex = 0;
     this.answers = [];
+    this.unanswered = 0;//number of players yet to answer
   }
 }
 

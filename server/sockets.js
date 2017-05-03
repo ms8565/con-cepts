@@ -22,7 +22,7 @@ const demoQuestion = 'What is the best kind of graph?';
 const demoAnswer = 'bar graph';
 
 const rounds = [];
-const currentRound = 0;
+let currentRound = 0;
 rounds.push(new Round('question', 'answer'));
 rounds.push(new Round(demoQuestion, demoAnswer));
 
@@ -63,17 +63,18 @@ const changeState = (newState) => {
       // Tell all users to start the round, send them the current question
       data = { newState: currentState, question: currentQuestion };
       io.sockets.in('room1').emit('changeState', data);
-
-      setTimeout(() => {
-        changeState(APP_STATES.SHOW_CHOICES);
-      }, 5000);
-
+      
       break;
     }
     case APP_STATES.ROUND_END: {
       // Send the users the point totals
       io.sockets.in('room1').emit('changeState', currentState);
-
+        
+      rounds[currentRound].answers[rounds[currentRound].correctIndex].pickedBy.forEach(function(e){
+          rooms["room1"].players[e].score += 100;
+      })
+        
+      currentRound++;
       // After 10 seconds, start the next round
       setTimeout(() => {
         changeState(APP_STATES.ROUND_START);
@@ -108,7 +109,9 @@ const addUserToRoom = (sock) => {
 
   const roomName = 'room1';
   socket.roomName = roomName;
-  rooms[roomName] = new Room(roomName);
+    if(rooms[roomName] == null){
+        rooms[roomName] = new Room(roomName);
+    }
   /* let added = false;
 
   const keys = Object.keys(rooms);
@@ -157,17 +160,20 @@ const setupSockets = (ioServer) => {
 
     // create a new character and store it by its unique id
     room.players[hash] = new Player(hash);
-
     // emit joined event to the user
     socket.emit('joined', room.players[hash]);
 
-    socket.on('chooseAnswerNum', (choice) => {
-      rounds[currentRound].answers[choice].pickedBy.push(socket.hash);
-      console.log(`choice: ${choice}`);
+    socket.on('chooseAnswerNum', (data) => {
+      rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);
+        rounds[currentRound].unanswered--;
+        if(rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
+      console.log(`choice: ${data.question}`);
     });
     socket.on('submitAnswerText', (data) => {
       const answer = new Answer(socket.hash, data.answer);
       rounds[currentRound].answers.push(answer);
+        rounds[currentRound].unanswered++;
+        if(rounds[currentRound].unanswered == Object.keys(rooms["room1"].players).length) changeState(APP_STATES.SHOW_CHOICES);
     });
     socket.on('changeState', (data) => {
       changeState(data.newState);
