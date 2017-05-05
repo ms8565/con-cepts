@@ -85,11 +85,11 @@ const changeState = (newState) => {
       // io.sockets.in('room1').emit('changeState', currentState);
 
       rounds[currentRound].answers[rounds[currentRound].correctIndex].pickedBy.forEach((e) => {
-        rooms["room1"].players[e].score += 100;
+        rooms.room1.players[e].score += 100;
       });
       data = {
         newState: currentState,
-        players: rooms["room1"].players,
+        players: rooms.room1.players,
         answers: rounds[currentRound].answers,
       };
       io.sockets.in('room1').emit('changeState', data);
@@ -192,26 +192,26 @@ const setupSockets = (ioServer) => {
       console.log(`choice: ${data.question}`);
     });
     socket.on('submitAnswerText', (data) => {
-      var same = true;
-        console.log("answer: " + data.answer);
+      let same = true;
+      console.log(`answer: ${data.answer}`);
       rounds[currentRound].answers.forEach((e) => {
-          console.log("same: " + e.text + "," + data.answer);
-          if(e.text == data.answer || data.answer == ""){
+        console.log(`same: ${e.text},${data.answer}`);
+        if (e.text === data.answer || data.answer === '') {
           same = false;
-      }});
-        console.log(same);
-      if(same){
-          const answer = new Answer(socket.hash, data.answer);
-          rounds[currentRound].answers.push(answer);
-          rounds[currentRound].unanswered++;
-          if (rounds[currentRound].unanswered === room.numUsers) {
-            changeState(APP_STATES.SHOW_CHOICES);
-          }
-          else {
-              //Wait for other players to finish
-              data = { newState: APP_STATES.ROUND_WAIT }
-              socket.emit('changeState', data);
-          }
+        }
+      });
+      console.log(same);
+      if (same) {
+        const answer = new Answer(socket.hash, data.answer);
+        rounds[currentRound].answers.push(answer);
+        rounds[currentRound].unanswered++;
+        if (rounds[currentRound].unanswered === room.numUsers) {
+          changeState(APP_STATES.SHOW_CHOICES);
+        } else {
+              // Wait for other players to finish
+          const send = { newState: APP_STATES.ROUND_WAIT };
+          socket.emit('changeState', send);
+        }
       }
     });
     socket.on('changeState', (data) => {
@@ -220,19 +220,18 @@ const setupSockets = (ioServer) => {
 
     socket.on('disconnect', () => {
       io.sockets.in(socket.roomName).emit('left', room.players[socket.hash]);
-        console.log("round num: " + currentState);
+      console.log(`round num: ${currentState}`);
 
       delete room.players[socket.hash];
       room.numUsers--;
-        if(currentState == 6){ 
-            rounds[currentRound].unanswered--;
-            if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
-        }
-        else if(currentState == 4){
-            rounds[currentRound].unanswered++;
-            console.log("unanswered: " + rounds[currentRound].unanswered);
-            if (rounds[currentRound].unanswered >= room.numUsers) changeState(APP_STATES.SHOW_CHOICES);
-        }
+      if (currentState === 6) {
+        rounds[currentRound].unanswered--;
+        if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
+      } else if (currentState === 4) {
+        rounds[currentRound].unanswered++;
+        console.log(`unanswered: ${rounds[currentRound].unanswered}`);
+        if (rounds[currentRound].unanswered >= room.numUsers) changeState(APP_STATES.SHOW_CHOICES);
+      }
 
       // if the room is now empty, delete it
       if (room.numUsers <= 0) {
