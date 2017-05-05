@@ -226,6 +226,7 @@ const setupSockets = (ioServer) => {
       delete room.players[socket.hash];
       room.numUsers--;
       if (currentState === 6) {
+        rounds[currentRound].unanswered--;
         if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
       } else if (currentState === 4) {
         console.log(`unanswered: ${rounds[currentRound].unanswered}`);
