@@ -192,11 +192,26 @@ const setupSockets = (ioServer) => {
       console.log(`choice: ${data.question}`);
     });
     socket.on('submitAnswerText', (data) => {
-      const answer = new Answer(socket.hash, data.answer);
-      rounds[currentRound].answers.push(answer);
-      rounds[currentRound].unanswered++;
-      if (rounds[currentRound].unanswered === Object.keys(rooms.room1.players).length) {
-        changeState(APP_STATES.SHOW_CHOICES);
+      var same = true;
+        console.log("answer: " + data.answer);
+      rounds[currentRound].answers.forEach((e) => {
+          console.log("same: " + e.text + "," + data.answer);
+          if(e.text == data.answer || data.answer == " "){
+          same = false;
+      }});
+        console.log(same);
+      if(same){
+          const answer = new Answer(socket.hash, data.answer);
+          rounds[currentRound].answers.push(answer);
+          rounds[currentRound].unanswered++;
+          if (rounds[currentRound].unanswered === Object.keys(rooms.room1.players).length) {
+            changeState(APP_STATES.SHOW_CHOICES);
+          }
+          else {
+              //Wait for other players to finish
+              data = { newState: APP_STATES.ROUND_WAIT }
+              socket.emit('changeState', data);
+          }
       }
     });
     socket.on('changeState', (data) => {
