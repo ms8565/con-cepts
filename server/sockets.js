@@ -187,6 +187,7 @@ const setupSockets = (ioServer) => {
 
     socket.on('chooseAnswerNum', (data) => {
       rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);
+      console.log(`unanswered: ${rounds[currentRound].unanswered}`);
       rounds[currentRound].unanswered--;
       if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
       console.log(`choice: ${data.question}`);
@@ -225,10 +226,8 @@ const setupSockets = (ioServer) => {
       delete room.players[socket.hash];
       room.numUsers--;
       if (currentState === 6) {
-        rounds[currentRound].unanswered--;
         if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
       } else if (currentState === 4) {
-        rounds[currentRound].unanswered++;
         console.log(`unanswered: ${rounds[currentRound].unanswered}`);
         if (rounds[currentRound].unanswered >= room.numUsers) changeState(APP_STATES.SHOW_CHOICES);
       }
