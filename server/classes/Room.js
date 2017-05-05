@@ -2,7 +2,7 @@
 class Room {
   constructor(name) {
     this.name = name;
-    this.numUsers = 1;
+    this.numUsers = 0;
     this.players = {};
   }
 }

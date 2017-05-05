@@ -85,11 +85,11 @@ const changeState = (newState) => {
       // io.sockets.in('room1').emit('changeState', currentState);
 
       rounds[currentRound].answers[rounds[currentRound].correctIndex].pickedBy.forEach((e) => {
-        rooms.room1.players[e].score += 100;
+        rooms["room1"].players[e].score += 100;
       });
       data = {
         newState: currentState,
-        players: rooms.room1.players,
+        players: rooms["room1"].players,
         answers: rounds[currentRound].answers,
       };
       io.sockets.in('room1').emit('changeState', data);
@@ -179,7 +179,7 @@ const setupSockets = (ioServer) => {
     socket.join(socket.roomName);
 
     const room = rooms[socket.roomName];
-
+    room.numUsers++;
     // create a new character and store it by its unique id
     room.players[hash] = new Player(hash);
     // emit joined event to the user
@@ -196,7 +196,7 @@ const setupSockets = (ioServer) => {
         console.log("answer: " + data.answer);
       rounds[currentRound].answers.forEach((e) => {
           console.log("same: " + e.text + "," + data.answer);
-          if(e.text == data.answer || data.answer == " "){
+          if(e.text == data.answer || data.answer == ""){
           same = false;
       }});
         console.log(same);
@@ -204,7 +204,7 @@ const setupSockets = (ioServer) => {
           const answer = new Answer(socket.hash, data.answer);
           rounds[currentRound].answers.push(answer);
           rounds[currentRound].unanswered++;
-          if (rounds[currentRound].unanswered === Object.keys(rooms.room1.players).length) {
+          if (rounds[currentRound].unanswered === room.numUsers) {
             changeState(APP_STATES.SHOW_CHOICES);
           }
           else {
@@ -220,9 +220,19 @@ const setupSockets = (ioServer) => {
 
     socket.on('disconnect', () => {
       io.sockets.in(socket.roomName).emit('left', room.players[socket.hash]);
+        console.log("round num: " + currentState);
 
       delete room.players[socket.hash];
       room.numUsers--;
+        if(currentState == 6){ 
+            rounds[currentRound].unanswered--;
+            if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
+        }
+        else if(currentState == 4){
+            rounds[currentRound].unanswered++;
+            console.log("unanswered: " + rounds[currentRound].unanswered);
+            if (rounds[currentRound].unanswered >= room.numUsers) changeState(APP_STATES.SHOW_CHOICES);
+        }
 
       // if the room is now empty, delete it
       if (room.numUsers <= 0) {
