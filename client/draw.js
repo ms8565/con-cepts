@@ -37,6 +37,7 @@ const drawRoundStart = (question) => {
   //Add answer section
   let answersElement = document.createElement("div");
   answersElement.setAttribute("id", "answers");
+    console.log("contentBox: " + answersElement);
   
   //Add text box
   let textElement = document.createElement("input");
@@ -58,6 +59,13 @@ const drawRoundStart = (question) => {
 //Display waiting screen while other players answer
 const drawRoundWait = () => {
   let contentBox = document.querySelector('#answers');
+    if(contentBox == null){
+        let content = document.querySelector('#state-content');
+        let answersElement = document.createElement("div");
+        answersElement.setAttribute("id", "answers");
+        content.appendChild(answersElement);
+        contentBox = document.querySelector('#answers');
+    }
   contentBox.innerHTML = "PLEASE WAIT FOR ROUND TO FINISH";
 };
 

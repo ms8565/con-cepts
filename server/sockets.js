@@ -183,7 +183,8 @@ const setupSockets = (ioServer) => {
     // create a new character and store it by its unique id
     room.players[hash] = new Player(hash);
     // emit joined event to the user
-    socket.emit('joined', room.players[hash]);
+    const joinData = { hash: room.players[hash], currentState };
+    socket.emit('joined', joinData);
 
     socket.on('chooseAnswerNum', (data) => {
       rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);

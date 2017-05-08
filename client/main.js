@@ -84,8 +84,13 @@ const init = () => {
   socket = io.connect();
 
   socket.on('joined', (data) => {
-    addUser(data);
-    changeState(APP_STATES.LOGIN_WAIT);
+    addUser(data.hash);
+      if(data.currentState == 6){
+          changeState(APP_STATES.ROUND_WAIT);
+      }
+      else{
+        changeState(APP_STATES.LOGIN_WAIT);
+      }
   }); 
     
   socket.on('drawRound', (data) =>{
