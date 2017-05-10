@@ -218,7 +218,7 @@ const setupSockets = (ioServer) => {
       } else {
         const player = room.players[socket.hash];
         if (player.finalRoundNum < rounds.length) {
-          const currentQuestion = rounds[currentRound].question;
+          const currentQuestion = rounds[player.finalRoundNum].question;
           const currentAnswers = rounds[player.finalRoundNum].answers;
 
                 // Get authorless answers
