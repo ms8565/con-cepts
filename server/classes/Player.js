@@ -12,6 +12,8 @@ class Player {
 
     // random number array for final round
     this.randNums = [];
+    // level of final round they are on
+    this.finalRoundNum = 0;
   }
 }
 

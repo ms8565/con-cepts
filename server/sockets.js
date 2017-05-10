@@ -209,11 +209,27 @@ const setupSockets = (ioServer) => {
     socket.emit('joined', joinData);
 
     socket.on('chooseAnswerNum', (data) => {
-      rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);
-      console.log(`unanswered: ${rounds[currentRound].unanswered}`);
-      rounds[currentRound].unanswered--;
-      if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
-      console.log(`choice: ${data.question}`);
+      if (currentState !== APP_STATES.GAME_END) {
+        rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);
+        console.log(`unanswered: ${rounds[currentRound].unanswered}`);
+        rounds[currentRound].unanswered--;
+        if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
+        console.log(`choice: ${data.question}`);
+      } else {
+        const player = room.players[socket.hash];
+        if (player.finalRoundNum < rounds.length) {
+          const currentQuestion = rounds[currentRound].question;
+          const currentAnswers = rounds[player.finalRoundNum].answers;
+
+                // Get authorless answers
+          const choices = currentAnswers.map((answer) => answer.text);
+
+          const send = { newState: APP_STATES.SHOW_CHOICES,
+            question: currentQuestion, answers: choices };
+          player.finalRoundNum++;
+          socket.emit('changeState', send);
+        }
+      }
     });
     socket.on('submitAnswerText', (data) => {
       let same = true;
