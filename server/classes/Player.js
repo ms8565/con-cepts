@@ -9,6 +9,9 @@ class Player {
 
     // last time this character was updated
     this.lastUpdate = new Date().getTime();
+      
+    //random number array for final round
+    this.randNums = [];
   }
 }
 

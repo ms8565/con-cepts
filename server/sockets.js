@@ -25,7 +25,7 @@ const rounds = [];
 let currentRound = 0;
 rounds.push(new Round('question', 'answer'));
 rounds.push(new Round(demoQuestion, demoAnswer));
-rounds.push(new Round('what is the only fully evolved fire type not to learn solar beam?',
+/*rounds.push(new Round('what is the only fully evolved fire type not to learn solar beam?',
                       'Flareon'));
 rounds.push(new Round('do you like jazz?', 'yes'));
 rounds.push(new Round('can I sleep yet?',
@@ -36,7 +36,7 @@ rounds.push(new Round('what does a $7 root beer taste like?',
                       'about $5 worth of root beer'));
 rounds.push(new Round('Die Geschichte vom Daumenlutscher?',
                       'in schnellem Lauf Springt der Schneider'));
-
+*/
 
 const APP_STATES = {
   LOGIN: 1,
@@ -100,7 +100,7 @@ const changeState = (newState) => {
           currentRound++;
           changeState(APP_STATES.ROUND_START);
         } else changeState(APP_STATES.GAME_END);
-      }, 10000);
+      }, 5000);
 
       break;
     }
@@ -117,9 +117,15 @@ const changeState = (newState) => {
       io.sockets.in('room1').emit('changeState', data);
       break;
     }
-    case APP_STATES.GAME_END:
+    case APP_STATES.GAME_END:{
 
+        Array.prototype.forEach.call(rooms.room1.players, e => {
+            e.randNums = randomArray();
+        })
+        
+        console.log("Game End");
       break;
+    }
     default:
       break;
   }
@@ -243,6 +249,25 @@ const setupSockets = (ioServer) => {
       socket.leave(socket.roomName);
     });
   });
+};
+
+const randomArray = () =>{
+    var randAr = [];
+    //loop until there is a random number for every round
+    while(randAr.length < rounds.length){
+        for(var i = 0; i < rounds.length; i++){
+            randAr[i] = Math.floor(Math.random() * (rounds.length + 1) );
+        }
+        //make sure they're unique
+        randAr = randAr.filter( unique );
+    }
+    
+    return randAr;
+};
+
+//get rid of non-unique values in array
+const unique = (e, index, self) => {
+    return self.indexOf(e) === index;
 };
 
 module.exports.setupSockets = setupSockets;
