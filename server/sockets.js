@@ -1,4 +1,4 @@
-
+'use strict';
 
 // fast hashing library
 const xxh = require('xxhashjs');

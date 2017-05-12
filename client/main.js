@@ -17,7 +17,8 @@ const APP_STATES = {
   SHOW_CHOICES: 6,
   ROUND_END: 7,
   GAME_END: 8,
-  FINAL_RESULT: 9
+  FINAL_RESULT: 9,
+  CREATE_GAME: 10
 };
 
 let currentState = APP_STATES.LOGIN;
@@ -28,6 +29,10 @@ const changeState = (newState, data) => {
   switch(currentState){
     case APP_STATES.LOGIN_WAIT:
       drawLoginWait();
+      break;
+    case APP_STATES.CREATE_GAME:
+      console.log("check");
+      drawCreateGame();
       break;
     case APP_STATES.GAME_START:
       drawGameStart();
@@ -47,11 +52,15 @@ const changeState = (newState, data) => {
     case APP_STATES.GAME_END:
       drawGameEnd();
       break;
-    case APP_STATES.RINAL_RESULT:
+    case APP_STATES.FINAL_RESULT:
         drawFinalResult(data.players);
         break;
   }
 };
+
+const onCreateClick = (e) => {
+  changeState(APP_STATES.CREATE_GAME);
+}
 
 const onStartClick = (e) => {
   let state = APP_STATES.GAME_START;
@@ -77,6 +86,14 @@ const onAnswerSubmit = () => {
 };
 
 
+const checkCreateRoom = () => {
+  
+};
+
+const checkJoinRoom = () => {
+  
+};
+
 
 const setupCanvas = () => {
   canvas = document.querySelector('#canvas');
@@ -84,6 +101,10 @@ const setupCanvas = () => {
 }
 
 const init = () => {
+  document.getElementById("createBtn").onclick = function(){
+    changeState(APP_STATES.CREATE_GAME);
+  }
+  
   socket = io.connect();
 
   socket.on('joined', (data) => {
@@ -92,7 +113,7 @@ const init = () => {
           changeState(APP_STATES.ROUND_WAIT);
       }
       else{
-        changeState(APP_STATES.LOGIN_WAIT);
+       // changeState(APP_STATES.LOGIN_WAIT);
       }
   }); 
     

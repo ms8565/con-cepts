@@ -1,3 +1,151 @@
+//I hate myself, and this function
+const drawCreateGame = () => {
+  let contentBox = document.querySelector('#state-content');
+  //Clear content box
+  contentBox.innerHTML = "";
+  
+  let container = document.createElement("div");
+  container.id = "create-form";
+  
+  //Game Room Name Form Group
+  let formGroup1 = document.createElement("div");
+  formGroup1.classList.add("form-group");
+  //Game Room Name label
+  let roomLabel = document.createElement("label");
+  roomLabel.htmlFor = "roomName";
+  roomLabel.innerText = "Game Room Name";
+  //Game Room Name Text Field
+  let roomName = document.createElement("INPUT");
+  roomName.id = "roomName";
+  roomName.type = "text";
+  roomName.placeholder = "Room Name";
+  roomName.classList.add("form-control");
+  //Game Room Name Help Span
+  let helpSpan1 = document.createElement("span");
+  helpSpan1.id = "roomNameHelp";
+  helpSpan1.classList.add("help-block");
+  helpSpan1.innerHTML = "test span";
+  
+  formGroup1.appendChild(roomLabel);
+  formGroup1.appendChild(roomName);
+  formGroup1.appendChild(helpSpan1);
+  container.appendChild(formGroup1);
+  
+  //User Name Form Group
+  let formGroup2 = document.createElement("div");
+  formGroup2.classList.add("form-group");
+  //User Name Name label
+  let userLabel = document.createElement("label");
+  userLabel.htmlFor = "userName";
+  userLabel.innerText = "Your Name";
+  //User Name Text Field
+  let userName = document.createElement("INPUT");
+  userName.id = "userName";
+  userName.type = "text";
+  userName.placeholder = "User Name";
+  userName.classList.add("form-control");
+  //User Name Help Span
+  let helpSpan2 = document.createElement("span");
+  helpSpan2.id = "userNameHelp";
+  helpSpan2.classList.add("help-block");
+  helpSpan2.innerHTML = "test span";
+  
+  formGroup2.appendChild(userLabel);
+  formGroup2.appendChild(userName);
+  formGroup2.appendChild(helpSpan2);
+  container.appendChild(formGroup2);
+  
+  
+  let newQuestionsBox = document.createElement("div");
+  newQuestionsBox.id = "new-questions";
+  
+  let addQABtn = document.createElement("BUTTON");
+  addQABtn.classList.add("btn");
+  addQABtn.classList.add("btn-default");
+  addQABtn.id = "addQABtn";
+  addQABtn.addEventListener("click", addQA);
+  addQABtn.innerHTML = "Add Question";
+  
+  newQuestionsBox.appendChild(addQABtn);
+  
+  
+  let createBtn = document.createElement("BUTTON");
+  createBtn.classList.add("btn");
+  createBtn.classList.add("btn-lg");
+  createBtn.classList.add("btn-custom");
+  createBtn.classList.add("btn-block");
+  createBtn.addEventListener("click", checkCreateRoom);
+  createBtn.innerHTML = "Create and Join Game";
+  
+  container.appendChild(newQuestionsBox);
+  container.appendChild(createBtn);
+  
+  contentBox.appendChild(container);
+  
+  addQA();
+};
+
+
+const addQA = () => {
+  let newQuestionBox = document.createElement("div");
+  newQuestionBox.classList.add("new-qa");
+  newQuestionBox.classList.add("well");
+  newQuestionBox.classList.add("form-group");
+  
+  //Question label
+  let questionLabel = document.createElement("label");
+  questionLabel.htmlFor = "question-input"+document.getElementById("new-questions").childElementCount;
+  questionLabel.innerText = "Question";
+  questionLabel.classList.add("new-q-label");
+  //Question textfield
+  let question = document.createElement("textarea");
+  question.innerHTML = "Write your new question";
+  question.id = "question-input"+document.getElementById("new-questions").childElementCount;
+  question.classList.add("new-question");
+  question.classList.add("form-control");
+  question.classList.rows = '3';
+  
+  
+  //Answer label
+  let answerLabel = document.createElement("label");
+  answerLabel.htmlFor = "answers-input"+document.getElementById("new-questions").childElementCount;
+  answerLabel.innerText = "Answer";
+
+  //Answer textfield
+  let answer = document.createElement("textarea");
+  answer.innerHTML = "Write your new answer";
+  answer.id = "answer-input"+document.getElementById("new-questions").childElementCount;
+  answer.classList.add("new-answer");
+  answer.classList.add("form-control");
+  answer.classList.rows = '3';
+  
+  let deleteQABtn = document.createElement("BUTTON");
+  deleteQABtn.classList.add("btn");
+  deleteQABtn.classList.add("btn-danger");
+  deleteQABtn.addEventListener("click", function(){
+    document.getElementById("new-questions").removeChild(newQuestionBox);
+  });
+  deleteQABtn.innerHTML = '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>';
+  
+  newQuestionBox.appendChild(questionLabel);
+  newQuestionBox.appendChild(deleteQABtn);
+  newQuestionBox.appendChild(question);
+  newQuestionBox.appendChild(answerLabel);
+  newQuestionBox.appendChild(answer);
+
+  
+  //Insert before "Add Question" button
+  let addQABtn = document.getElementById("addQABtn")
+    document.getElementById("new-questions").insertBefore(newQuestionBox, addQABtn);
+};
+
+const deleteQA = (element) => {
+  //Remove "new-qa" div, which is parent of the deleteBtn
+  //Have the "new-questions" div remove the "new-qa" div
+  console.log('checkdelete');
+  element.parentNode.removeChild(element);
+};
+
 const drawLoginWait = () => {
   console.log('test');
   let contentBox = document.querySelector('#state-content');

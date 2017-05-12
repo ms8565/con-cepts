@@ -1,4 +1,147 @@
-'use strict';
+"use strict";
+
+//I hate myself, and this function
+var drawCreateGame = function drawCreateGame() {
+  var contentBox = document.querySelector('#state-content');
+  //Clear content box
+  contentBox.innerHTML = "";
+
+  var container = document.createElement("div");
+  container.id = "create-form";
+
+  //Game Room Name Form Group
+  var formGroup1 = document.createElement("div");
+  formGroup1.classList.add("form-group");
+  //Game Room Name label
+  var roomLabel = document.createElement("label");
+  roomLabel.htmlFor = "roomName";
+  roomLabel.innerText = "Game Room Name";
+  //Game Room Name Text Field
+  var roomName = document.createElement("INPUT");
+  roomName.id = "roomName";
+  roomName.type = "text";
+  roomName.placeholder = "Room Name";
+  roomName.classList.add("form-control");
+  //Game Room Name Help Span
+  var helpSpan1 = document.createElement("span");
+  helpSpan1.id = "roomNameHelp";
+  helpSpan1.classList.add("help-block");
+  helpSpan1.innerHTML = "test span";
+
+  formGroup1.appendChild(roomLabel);
+  formGroup1.appendChild(roomName);
+  formGroup1.appendChild(helpSpan1);
+  container.appendChild(formGroup1);
+
+  //User Name Form Group
+  var formGroup2 = document.createElement("div");
+  formGroup2.classList.add("form-group");
+  //User Name Name label
+  var userLabel = document.createElement("label");
+  userLabel.htmlFor = "userName";
+  userLabel.innerText = "Your Name";
+  //User Name Text Field
+  var userName = document.createElement("INPUT");
+  userName.id = "userName";
+  userName.type = "text";
+  userName.placeholder = "User Name";
+  userName.classList.add("form-control");
+  //User Name Help Span
+  var helpSpan2 = document.createElement("span");
+  helpSpan2.id = "userNameHelp";
+  helpSpan2.classList.add("help-block");
+  helpSpan2.innerHTML = "test span";
+
+  formGroup2.appendChild(userLabel);
+  formGroup2.appendChild(userName);
+  formGroup2.appendChild(helpSpan2);
+  container.appendChild(formGroup2);
+
+  var newQuestionsBox = document.createElement("div");
+  newQuestionsBox.id = "new-questions";
+
+  var addQABtn = document.createElement("BUTTON");
+  addQABtn.classList.add("btn");
+  addQABtn.classList.add("btn-default");
+  addQABtn.id = "addQABtn";
+  addQABtn.addEventListener("click", addQA);
+  addQABtn.innerHTML = "Add Question";
+
+  newQuestionsBox.appendChild(addQABtn);
+
+  var createBtn = document.createElement("BUTTON");
+  createBtn.classList.add("btn");
+  createBtn.classList.add("btn-lg");
+  createBtn.classList.add("btn-custom");
+  createBtn.classList.add("btn-block");
+  createBtn.addEventListener("click", checkCreateRoom);
+  createBtn.innerHTML = "Create and Join Game";
+
+  container.appendChild(newQuestionsBox);
+  container.appendChild(createBtn);
+
+  contentBox.appendChild(container);
+
+  addQA();
+};
+
+var addQA = function addQA() {
+  var newQuestionBox = document.createElement("div");
+  newQuestionBox.classList.add("new-qa");
+  newQuestionBox.classList.add("well");
+  newQuestionBox.classList.add("form-group");
+
+  //Question label
+  var questionLabel = document.createElement("label");
+  questionLabel.htmlFor = "question-input" + document.getElementById("new-questions").childElementCount;
+  questionLabel.innerText = "Question";
+  questionLabel.classList.add("new-q-label");
+  //Question textfield
+  var question = document.createElement("textarea");
+  question.innerHTML = "Write your new question";
+  question.id = "question-input" + document.getElementById("new-questions").childElementCount;
+  question.classList.add("new-question");
+  question.classList.add("form-control");
+  question.classList.rows = '3';
+
+  //Answer label
+  var answerLabel = document.createElement("label");
+  answerLabel.htmlFor = "answers-input" + document.getElementById("new-questions").childElementCount;
+  answerLabel.innerText = "Answer";
+
+  //Answer textfield
+  var answer = document.createElement("textarea");
+  answer.innerHTML = "Write your new answer";
+  answer.id = "answer-input" + document.getElementById("new-questions").childElementCount;
+  answer.classList.add("new-answer");
+  answer.classList.add("form-control");
+  answer.classList.rows = '3';
+
+  var deleteQABtn = document.createElement("BUTTON");
+  deleteQABtn.classList.add("btn");
+  deleteQABtn.classList.add("btn-danger");
+  deleteQABtn.addEventListener("click", function () {
+    document.getElementById("new-questions").removeChild(newQuestionBox);
+  });
+  deleteQABtn.innerHTML = '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>';
+
+  newQuestionBox.appendChild(questionLabel);
+  newQuestionBox.appendChild(deleteQABtn);
+  newQuestionBox.appendChild(question);
+  newQuestionBox.appendChild(answerLabel);
+  newQuestionBox.appendChild(answer);
+
+  //Insert before "Add Question" button
+  var addQABtn = document.getElementById("addQABtn");
+  document.getElementById("new-questions").insertBefore(newQuestionBox, addQABtn);
+};
+
+var deleteQA = function deleteQA(element) {
+  //Remove "new-qa" div, which is parent of the deleteBtn
+  //Have the "new-questions" div remove the "new-qa" div
+  console.log('checkdelete');
+  element.parentNode.removeChild(element);
+};
 
 var drawLoginWait = function drawLoginWait() {
   console.log('test');
@@ -39,6 +182,7 @@ var drawRoundStart = function drawRoundStart(question) {
   //Add answer section
   var answersElement = document.createElement("div");
   answersElement.setAttribute("id", "answers");
+  console.log("contentBox: " + answersElement);
 
   //Add text box
   var textElement = document.createElement("input");
@@ -60,6 +204,13 @@ var drawRoundStart = function drawRoundStart(question) {
 //Display waiting screen while other players answer
 var drawRoundWait = function drawRoundWait() {
   var contentBox = document.querySelector('#answers');
+  if (contentBox == null) {
+    var content = document.querySelector('#state-content');
+    var answersElement = document.createElement("div");
+    answersElement.setAttribute("id", "answers");
+    content.appendChild(answersElement);
+    contentBox = document.querySelector('#answers');
+  }
   contentBox.innerHTML = "PLEASE WAIT FOR ROUND TO FINISH";
 };
 
@@ -137,7 +288,9 @@ var APP_STATES = {
   ROUND_WAIT: 5,
   SHOW_CHOICES: 6,
   ROUND_END: 7,
-  GAME_END: 8
+  GAME_END: 8,
+  FINAL_RESULT: 9,
+  CREATE_GAME: 10
 };
 
 var currentState = APP_STATES.LOGIN;
@@ -148,6 +301,10 @@ var changeState = function changeState(newState, data) {
   switch (currentState) {
     case APP_STATES.LOGIN_WAIT:
       drawLoginWait();
+      break;
+    case APP_STATES.CREATE_GAME:
+      console.log("check");
+      drawCreateGame();
       break;
     case APP_STATES.GAME_START:
       drawGameStart();
@@ -167,8 +324,14 @@ var changeState = function changeState(newState, data) {
     case APP_STATES.GAME_END:
       drawGameEnd();
       break;
-
+    case APP_STATES.FINAL_RESULT:
+      drawFinalResult(data.players);
+      break;
   }
+};
+
+var onCreateClick = function onCreateClick(e) {
+  changeState(APP_STATES.CREATE_GAME);
 };
 
 var onStartClick = function onStartClick(e) {
@@ -194,17 +357,29 @@ var onAnswerSubmit = function onAnswerSubmit() {
   changeState(APP_STATES.ROUND_WAIT);
 };
 
+var checkCreateRoom = function checkCreateRoom() {};
+
+var checkJoinRoom = function checkJoinRoom() {};
+
 var setupCanvas = function setupCanvas() {
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
 };
 
 var init = function init() {
+  document.getElementById("createBtn").onclick = function () {
+    changeState(APP_STATES.CREATE_GAME);
+  };
+
   socket = io.connect();
 
   socket.on('joined', function (data) {
-    addUser(data);
-    changeState(APP_STATES.LOGIN_WAIT);
+    addUser(data.hash);
+    if (data.currentState == 6) {
+      changeState(APP_STATES.ROUND_WAIT);
+    } else {
+      // changeState(APP_STATES.LOGIN_WAIT);
+    }
   });
 
   socket.on('drawRound', function (data) {
@@ -216,7 +391,8 @@ var init = function init() {
   });
 
   socket.on('changeState', function (data) {
-    changeState(data.newState, data);
+    console.log("data hash: " + data.hash + ", this hash: " + hash);
+    if (data.hash == hash || data.hash == null) changeState(data.newState, data);
   });
 };
 
