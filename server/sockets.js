@@ -135,23 +135,21 @@ const changeState = (newState, socket) => {
       break;
     }
     case APP_STATES.GAME_END: {
-        rooms.room1.finalTurns = Object.keys(rooms.room1.players).length * rounds.length;
-        console.log("final turns: "+Object.keys(rooms.room1.players).length + ", rounds: " + rounds.length);
-        for(var e in rooms.room1.players){
-            const player = rooms.room1.players[e];
-            player.randNums = randomArray();
-            const currentQ = rounds[player.finalRoundNum].question;
-            const currentA = rounds[player.finalRoundNum].answers;
+        const room = rooms.room1;
+        room.finalTurns = Object.keys(room.players).length * rounds.length;
+        console.log("final turns: "+Object.keys(room.players).length + ", rounds: " + rounds.length);
+        
+        room.randNums = randomArray();
+        const currentQ = rounds[0].question;
+        const currentA = rounds[0].answers;
 
-                // Get authorless answers
-            const choices = currentAnswers.map((answer) => answer.text);
-
-            data = { newState: APP_STATES.SHOW_CHOICES,
-            question: currentQ, answers: choices, hash: player.hash };
-            player.finalRoundNum++;
-            console.log("Question: " + data.question);
-            io.sockets.in('room1').emit('changeState', data);
-        }
+        // Get authorless answers
+        const choices = currentA.map((answer) => answer.text);
+        data = { newState: APP_STATES.SHOW_CHOICES,
+        question: currentQ, answers: choices };
+        
+        console.log("Question: " + data.question);
+        io.sockets.in('room1').emit('changeState', data);
 
       break;
     }
@@ -244,6 +242,7 @@ const setupSockets = (ioServer) => {
           console.log("final turns left: "+room.finalTurns);
         const player = room.players[socket.hash];
         if (player.finalRoundNum < rounds.length) {
+          if(data.question != rounds[player.finalRoundNum].correctIndex) {player.finalRoundNum--; room.finalTurns++;}
           const currentQuestion = rounds[player.finalRoundNum].question;
           const currentAnswers = rounds[player.finalRoundNum].answers;
 
@@ -251,12 +250,12 @@ const setupSockets = (ioServer) => {
           const choices = currentAnswers.map((answer) => answer.text);
 
           const send = { newState: APP_STATES.SHOW_CHOICES,
-            question: currentQuestion, answers: choices };
+            question: currentQuestion, answers: choices, hash: hash };
           player.finalRoundNum++;
           socket.emit('changeState', send);
         }
           else{
-              player.score = 500 - (room.finalPlace * 100);
+              player.score += 500 - (room.finalPlace * 100);
               room.finalPlace++;
           }
         if(room.finalTurns == 0){
