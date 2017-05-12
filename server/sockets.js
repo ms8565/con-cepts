@@ -256,7 +256,7 @@ const setupSockets = (ioServer) => {
           socket.emit('changeState', send);
         }
           else{
-              player.score = 500 - (room.finalPlace * 100);
+              player.score += 500 - (room.finalPlace * 100);
               room.finalPlace++;
           }
         if(room.finalTurns == 0){
