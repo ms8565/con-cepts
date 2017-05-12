@@ -63,11 +63,12 @@ const APP_STATES = {
   SHOW_CHOICES: 6,
   ROUND_END: 7,
   GAME_END: 8,
+  FINAL_RESULT: 9
 };
 
 let currentState = APP_STATES.LOGIN_WAIT;
 
-const changeState = (newState) => {
+const changeState = (newState, socket) => {
   currentState = newState;
   console.log(`current state: ${currentState}`);
 
@@ -115,8 +116,8 @@ const changeState = (newState) => {
         if (rounds[currentRound + 1] != null) {
           currentRound++;
           changeState(APP_STATES.ROUND_START);
-        } else changeState(APP_STATES.GAME_END);
-      }, 5000);
+        } else changeState(APP_STATES.GAME_END, socket);
+      }, 2000);
 
       break;
     }
@@ -134,14 +135,34 @@ const changeState = (newState) => {
       break;
     }
     case APP_STATES.GAME_END: {
-      Array.prototype.forEach.call(rooms.room1.players, (e) => {
-        const player = e;
-        player.randNums = randomArray();
-      });
+        rooms.room1.finalTurns = Object.keys(rooms.room1.players).length * rounds.length;
+        console.log("final turns: "+Object.keys(rooms.room1.players).length + ", rounds: " + rounds.length);
+        for(var e in rooms.room1.players){
+            const player = rooms.room1.players[e];
+            player.randNums = randomArray();
+            const currentQ = rounds[player.finalRoundNum].question;
+            const currentA = rounds[player.finalRoundNum].answers;
 
-      console.log('Game End');
+                // Get authorless answers
+            const choices = currentAnswers.map((answer) => answer.text);
+
+            data = { newState: APP_STATES.SHOW_CHOICES,
+            question: currentQ, answers: choices, hash: player.hash };
+            player.finalRoundNum++;
+            console.log("Question: " + data.question);
+            io.sockets.in('room1').emit('changeState', data);
+        }
+
       break;
     }
+      case APP_STATES.FINAL_RESULT: {
+      data = {
+        newState: APP_STATES.ROUND_END,
+        players: rooms.room1.players,
+          answers: rounds[currentRound].answers,
+      };
+      io.sockets.in('room1').emit('changeState', data);
+      }
     default:
       break;
   }
@@ -209,13 +230,18 @@ const setupSockets = (ioServer) => {
     socket.emit('joined', joinData);
 
     socket.on('chooseAnswerNum', (data) => {
-      if (currentState !== APP_STATES.GAME_END) {
+      if (currentState !== APP_STATES.GAME_END && currentState !== APP_STATES.FINAL_RESULT) {
         rounds[currentRound].answers[data.question].pickedBy.push(socket.hash);
         console.log(`unanswered: ${rounds[currentRound].unanswered}`);
         rounds[currentRound].unanswered--;
-        if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END);
+        if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END, socket);
         console.log(`choice: ${data.question}`);
-      } else {
+      } 
+        console.log("gameState: " + currentState);
+      if (currentState === APP_STATES.GAME_END) {
+          console.log("Game End");
+          room.finalTurns--;
+          console.log("final turns left: "+room.finalTurns);
         const player = room.players[socket.hash];
         if (player.finalRoundNum < rounds.length) {
           const currentQuestion = rounds[player.finalRoundNum].question;
@@ -228,6 +254,14 @@ const setupSockets = (ioServer) => {
             question: currentQuestion, answers: choices };
           player.finalRoundNum++;
           socket.emit('changeState', send);
+        }
+          else{
+              player.score = 500 - (room.finalPlace * 100);
+              room.finalPlace++;
+          }
+        if(room.finalTurns == 0){
+            console.log("final results");
+            changeState(APP_STATES.FINAL_RESULT);
         }
       }
     });

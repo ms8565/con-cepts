@@ -16,7 +16,8 @@ const APP_STATES = {
   ROUND_WAIT: 5,
   SHOW_CHOICES: 6,
   ROUND_END: 7,
-  GAME_END: 8
+  GAME_END: 8,
+  FINAL_RESULT: 9
 };
 
 let currentState = APP_STATES.LOGIN;
@@ -46,7 +47,9 @@ const changeState = (newState, data) => {
     case APP_STATES.GAME_END:
       drawGameEnd();
       break;
-    
+    case APP_STATES.RINAL_RESULT:
+        drawFinalResult(data.players);
+        break;
   }
 };
 
@@ -102,7 +105,8 @@ const init = () => {
   });
   
   socket.on('changeState', (data) => {
-    changeState(data.newState, data);
+      console.log("data hash: " + data.hash + ", this hash: " + hash);
+      if(data.hash == hash || data.hash == null) changeState(data.newState, data);
   });
     
     
