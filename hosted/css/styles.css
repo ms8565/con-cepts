@@ -1,7 +1,44 @@
+body{
+  padding-top: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+#state-content {
+  padding-bottom: 2em;
+  text-align: center;
+}
 .answers{
   width:90%;
   margin:auto;
 }
+
+.btn {
+    padding: 9px 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+ 
+.btn-custom {
+    background-color: #01ABAA;
+    color: #ffffff;
+    border: 0 none;
+    outline: 0 none;
+    box-shadow: 0 3px 0 0 #068281;
+}
+ 
+.btn-custom:hover, .btn-custom:focus, .btn-custom:active, .btn-custom.active, .open > .dropdown-toggle.btn-custom {
+    background-color: #26d0cf;
+   color: #ffffff;
+}
+ 
+.btn-custom:active, .btn-custom.active, , .btn-custom.focus, .btn-custom:focus {
+     background-color: #26d0cf;
+    color: #ffffff;
+    box-shadow: none;
+	margin-bottom: -3px;
+	margin-top: 3px;
+}
+
 .answer-btn {
   display:block;
   margin: 1em 0 1em 0;
@@ -28,4 +65,94 @@
   color: #fff;
   background-color: #286090;
   border-color: #204d74;
+}
+
+h4{
+  text-align: center;
+  padding: .7em;
+}
+
+.form-inline {
+  text-align: center;
+}
+.form-inline .btn, .form-inline .form-control{
+  font-size: 18px;
+}
+
+#createBtn {
+  width: 60%;
+  margin:auto;
+  text-align: center;
+  font-size: 18px;
+}
+.new-qa textarea{
+  margin-bottom: 1em;
+}
+.new-qa .btn{
+  float:right;
+  margin-top:-8px;
+}
+
+#new-questions{
+  margin-bottom: 3em;
+  margin-top: 1em;
+}
+
+.new-q-label{
+  margin-top:19px;
+}
+
+.navbar{
+  padding-top: .7em;
+  padding-bottom: .7em;
+  margin-bottom: 0;
+}
+.bd-pageheader{
+  background-color: #FEDC3D;
+  margin-bottom: 1.5em;
+  border-bottom: 3px solid #d2b118;
+}
+
+ .navbar-inverse .navbar-brand{
+  color:white;
+  font-size: 18pt;
+}
+
+.navbar-inverse .navbar-nav>li>a{
+  color:  #FEDC3D;
+  font-size: 14pt;
+}
+
+.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav>li>a, h1, h2, h3, h4{
+  font-family: 'Roboto', sans-serif;
+  
+}
+#create-form{
+  text-align: left;
+}
+
+.well{
+  background-color: #fff4ef;
+}
+.well, .new-qa textarea {
+  border: 1px solid #ffded1;
+}
+.well label{
+  color: black !important ;
+}
+.danger-btn{
+  background-color: #f94e07;
+  border-bottom-color: #e44300;
+}
+.danger-btn:hover, .danger-btn.hover{
+  background-color: #e44300;
+}
+
+.form-control{
+  border-color: #01ABAA;
+}
+
+.form-group label{
+  color: #068281;
+  font-size: 14pt;
 }

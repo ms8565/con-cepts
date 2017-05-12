@@ -32,6 +32,7 @@
     
     <link href="https://fonts.googleapis.com/css?family=PT+Sans|VT323" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Architects+Daughter" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Bungee|Roboto" rel="stylesheet">
     <link href="/assets/css/styles.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
 	<script src="/assets/compiled.js"> </script>
@@ -39,23 +40,48 @@
   </head>
 
   <body>
+    <header class="navbar navbar-inverse navbar-toggleable-md bd-navbar">
+      <nav class="container" style="max-width:840px;">
 
-    <div class="container" style="max-width:840px;">
-      <div class="header clearfix">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            <li role="presentation" class="active"><a href="#">Home</a></li>
-            <li role="presentation"><a href="#">About</a></li>
-            <li role="presentation"><a href="#">Contact</a></li>
-          </ul>
-        </nav>
-        <h3 class="text-muted">CONcepts</h3>
+      <div class="d-flex justify-content-between hidden-lg-up">
+        <a class="navbar-brand" href="/">
+          <span style="font-family: 'Bungee',sans-serif;">CON</span>cepts
+        </a>
       </div>
 
-      <!--<canvas id="canvas"  height="500" width="800">Please use an HTML 5 browser</canvas>-->
+      <div class="collapse navbar-collapse" id="bd-main-nav">
+        <ul class="nav navbar-nav">
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="#">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="#">Contact</a>
+          </li>
+        </ul>
+        </div>
+        </nav>
+    </header>
+    <div class="bd-pageheader text-center text-sm-left">
+      <div class="container" style="max-width:840px;">
+        <h1><span style="font-family: 'Bungee',sans-serif;">CON</span>cepts!</h1>
+          <p>An educational quiz game</p>
+      </div>
+    </div>
+    <div class="container" style="max-width:840px;">
       
       <div id="state-content">
+        <div class="form-inline">
+          <input id="roomNameField" class="form-control" type="text" placeholder="Room Name">
+          <input id="userNameField" class="form-control" type="text" placeholder="Your Name">
+          <input class="btn btn-custom" id="joinBtn" type="button" value="Join Game">
+        </div>
+        <h3><span style="font-family: 'Bungee',sans-serif; color: #068281;">OR</span></h3>
+        <input class="btn btn-custom btn-lg" id="createBtn" type="button" value="Create Game">
       </div>
+      
 
       <footer class="footer">
         <p>&copy; 2017 Madison Smith, Chris Granville.</p>
