@@ -10,6 +10,8 @@ const Room = require('./classes/Room.js');
 const Round = require('./classes/Round.js');
 // Answer class
 const Answer = require('./classes/Answer.js');
+// Array Randomizer
+const randomize = require('./randomize.js');
 
 // List of player rooms
 const rooms = {};
@@ -37,22 +39,6 @@ rounds.push(new Round('what does a $7 root beer taste like?',
 rounds.push(new Round('Die Geschichte vom Daumenlutscher?',
                       'in schnellem Lauf Springt der Schneider'));
 */
-
-// get rid of non-unique values in array
-const unique = (e, index, self) => self.indexOf(e) === index;
-
-const randomArray = () => {
-  let randAr = [];
-    // loop until there is a random number for every round
-  while (randAr.length < rounds.length) {
-    for (let i = 0; i < rounds.length; i++) {
-      randAr[i] = Math.floor(Math.random() * (rounds.length + 1));
-    }
-    // make sure they're unique
-    randAr = randAr.filter(unique);
-  }
-  return randAr;
-};
 
 const APP_STATES = {
   LOGIN: 1,
@@ -125,9 +111,21 @@ const changeState = (newState, socket) => {
       // shuffle round answers
       const newAnswer = new Answer('ANSWER', rounds[currentRound].correctAnswer);
       rounds[currentRound].answers.push(newAnswer);
+    
+      for(var i = 0; i < rounds[currentRound].answers.length; i++) console.log("currentAnswers: " + rounds[currentRound].answers[i].text);
+      rounds[currentRound].answers = randomize.randomizeArray(rounds[currentRound].answers);
+      for(var i = 0; i < rounds[currentRound].answers.length; i++) console.log("currentAnswers: " + rounds[currentRound].answers[i].text);
+        
+      rounds[currentRound].answers.forEach((e, index) =>{
+            console.log("answer: " + e.text);
 
-      // Get authorless answers
-      const choices = currentAnswers.map((answer) => answer.text);
+            if(e.text === rounds[currentRound].correctAnswer){
+                console.log("correct index: " + index);
+                rounds[currentRound].correctIndex = index;
+            }
+        });
+        // Get authorless answers
+        let choices = rounds[currentRound].answers.map((answer) => answer.text);
 
       // Send users the entered answers
       data = { newState: currentState, question: currentQuestion, answers: choices };
@@ -139,7 +137,7 @@ const changeState = (newState, socket) => {
         room.finalTurns = Object.keys(room.players).length * rounds.length;
         console.log("final turns: "+Object.keys(room.players).length + ", rounds: " + rounds.length);
         
-        room.randNums = randomArray();
+        //room.randNums = randomArray();
         const currentQ = rounds[0].question;
         const currentA = rounds[0].answers;
 
@@ -241,9 +239,27 @@ const setupSockets = (ioServer) => {
           room.finalTurns--;
           console.log("final turns left: "+room.finalTurns);
         const player = room.players[socket.hash];
+          console.log("finalRoundNum: " + player.finalRoundNum + ", rounds: " + rounds.length);
+          if(data.question == rounds[player.finalRoundNum].correctIndex) { 
+              console.log("correct!");
+              player.finalRoundNum++;
+              console.log("finalRoundNum: " + player.finalRoundNum + ", rounds: " + rounds.length);
+          }
+            else{
+                room.finalTurns++;
+                console.log("final turns left: "+room.finalTurns);
+            }
         if (player.finalRoundNum < rounds.length) {
-          if(data.question != rounds[player.finalRoundNum].correctIndex) {player.finalRoundNum--; room.finalTurns++;}
-          const currentQuestion = rounds[player.finalRoundNum].question;
+            //console.log("correct index: "+rounds[player.finalRoundNum].correctIndex);
+          /*if(data.question != rounds[player.finalRoundNum].correctIndex) {
+              if(player.finalRoundNum > 0)player.finalRoundNum--;
+              room.finalTurns++;
+              console.log("failed, finalRoundNum: " + player.finalRoundNum);
+              console.log("finalRoundNum: " + Object.keys(rounds));
+          }*/
+            for(var i = 0; i < rounds.length; i++) console.log("rounds questions: " + rounds[i].question);
+        
+            const currentQuestion = rounds[player.finalRoundNum].question;
           const currentAnswers = rounds[player.finalRoundNum].answers;
 
                 // Get authorless answers
@@ -251,11 +267,11 @@ const setupSockets = (ioServer) => {
 
           const send = { newState: APP_STATES.SHOW_CHOICES,
             question: currentQuestion, answers: choices, hash: hash };
-          player.finalRoundNum++;
+            console.log("correct: " + rounds[player.finalRoundNum].correctIndex + ", data index: " + data.question);
           socket.emit('changeState', send);
         }
           else{
-              player.score += 500 - (room.finalPlace * 100);
+              player.score += (Object.keys(room.players).length * 100) - (room.finalPlace * 100);
               room.finalPlace++;
           }
         if(room.finalTurns == 0){

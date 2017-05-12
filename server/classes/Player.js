@@ -11,7 +11,7 @@ class Player {
     this.lastUpdate = new Date().getTime();
 
     // level of final round they are on
-    this.finalRoundNum = 1;
+    this.finalRoundNum = 0;
     this.socket = sock;
   }
 }
