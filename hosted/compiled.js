@@ -22,15 +22,9 @@ var drawCreateGame = function drawCreateGame() {
   roomName.type = "text";
   roomName.placeholder = "Room Name";
   roomName.classList.add("form-control");
-  //Game Room Name Help Span
-  var helpSpan1 = document.createElement("span");
-  helpSpan1.id = "roomNameHelp";
-  helpSpan1.classList.add("help-block");
-  helpSpan1.innerHTML = "test span";
 
   formGroup1.appendChild(roomLabel);
   formGroup1.appendChild(roomName);
-  formGroup1.appendChild(helpSpan1);
   container.appendChild(formGroup1);
 
   //User Name Form Group
@@ -46,15 +40,9 @@ var drawCreateGame = function drawCreateGame() {
   userName.type = "text";
   userName.placeholder = "User Name";
   userName.classList.add("form-control");
-  //User Name Help Span
-  var helpSpan2 = document.createElement("span");
-  helpSpan2.id = "userNameHelp";
-  helpSpan2.classList.add("help-block");
-  helpSpan2.innerHTML = "test span";
 
   formGroup2.appendChild(userLabel);
   formGroup2.appendChild(userName);
-  formGroup2.appendChild(helpSpan2);
   container.appendChild(formGroup2);
 
   var newQuestionsBox = document.createElement("div");
@@ -69,6 +57,12 @@ var drawCreateGame = function drawCreateGame() {
 
   newQuestionsBox.appendChild(addQABtn);
 
+  // Name Help Span
+  var helpSpan = document.createElement("span");
+  helpSpan.id = "nameHelp";
+  helpSpan.classList.add("help-block");
+  helpSpan.innerHTML = "test span";
+
   var createBtn = document.createElement("BUTTON");
   createBtn.classList.add("btn");
   createBtn.classList.add("btn-lg");
@@ -78,6 +72,7 @@ var drawCreateGame = function drawCreateGame() {
   createBtn.innerHTML = "Create and Join Game";
 
   container.appendChild(newQuestionsBox);
+  container.appendChild(helpSpan);
   container.appendChild(createBtn);
 
   contentBox.appendChild(container);
@@ -357,9 +352,28 @@ var onAnswerSubmit = function onAnswerSubmit() {
   changeState(APP_STATES.ROUND_WAIT);
 };
 
-var checkCreateRoom = function checkCreateRoom() {};
+var checkJoinRoom = function checkJoinRoom() {
+  var roomInput = document.querySelector("#roomName").value;
+  var usernameInput = document.querySelector("#userName").value;
+  socket.emit('checkJoin', { roomName: roomInput, userName: usernameInput });
+};
+var checkCreateRoom = function checkCreateRoom() {
+  var roomInput = document.querySelector("#roomName").value;
+  var usernameInput = document.querySelector("#userName").value;
 
-var checkJoinRoom = function checkJoinRoom() {};
+  //get all questions and answers
+  var qaElements = document.getElementsByClassName("new-qa");
+  var QAs = [];
+  for (var i = 0; i < qaElements.length; i++) {
+    var _question = qaElements[i].getElementsByClassName("new-question")[0];
+    var answer = qaElements[i].getElementsByClassName("new-answer")[0];
+    QAs.push({ question: _question.value, answer: answer.value });
+  }
+  console.log(QAs);
+  if (QAs.length > 0) {
+    socket.emit('checkCreate', { roomName: roomInput, userName: usernameInput, rounds: QAs });
+  }
+};
 
 var setupCanvas = function setupCanvas() {
   canvas = document.querySelector('#canvas');
@@ -370,16 +384,25 @@ var init = function init() {
   document.getElementById("createBtn").onclick = function () {
     changeState(APP_STATES.CREATE_GAME);
   };
+  document.getElementById("joinBtn").onclick = checkJoinRoom;
 
   socket = io.connect();
 
-  socket.on('joined', function (data) {
+  setupSocket();
+};
+
+var setupSocket = function setupSocket() {
+  socket.on('joinRoom', function (data) {
     addUser(data.hash);
     if (data.currentState == 6) {
       changeState(APP_STATES.ROUND_WAIT);
     } else {
       // changeState(APP_STATES.LOGIN_WAIT);
     }
+  });
+  socket.on('denyRoom', function (data) {
+    var errorText = document.querySelector("#error-text");
+    errorText.innerHTML = data.message;
   });
 
   socket.on('drawRound', function (data) {

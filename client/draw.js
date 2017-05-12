@@ -7,6 +7,9 @@ const drawCreateGame = () => {
   let container = document.createElement("div");
   container.id = "create-form";
   
+
+  
+  
   //Game Room Name Form Group
   let formGroup1 = document.createElement("div");
   formGroup1.classList.add("form-group");
@@ -20,15 +23,10 @@ const drawCreateGame = () => {
   roomName.type = "text";
   roomName.placeholder = "Room Name";
   roomName.classList.add("form-control");
-  //Game Room Name Help Span
-  let helpSpan1 = document.createElement("span");
-  helpSpan1.id = "roomNameHelp";
-  helpSpan1.classList.add("help-block");
-  helpSpan1.innerHTML = "test span";
+
   
   formGroup1.appendChild(roomLabel);
   formGroup1.appendChild(roomName);
-  formGroup1.appendChild(helpSpan1);
   container.appendChild(formGroup1);
   
   //User Name Form Group
@@ -44,15 +42,9 @@ const drawCreateGame = () => {
   userName.type = "text";
   userName.placeholder = "User Name";
   userName.classList.add("form-control");
-  //User Name Help Span
-  let helpSpan2 = document.createElement("span");
-  helpSpan2.id = "userNameHelp";
-  helpSpan2.classList.add("help-block");
-  helpSpan2.innerHTML = "test span";
   
   formGroup2.appendChild(userLabel);
   formGroup2.appendChild(userName);
-  formGroup2.appendChild(helpSpan2);
   container.appendChild(formGroup2);
   
   
@@ -68,6 +60,11 @@ const drawCreateGame = () => {
   
   newQuestionsBox.appendChild(addQABtn);
   
+  // Name Help Span
+  let helpSpan = document.createElement("span");
+  helpSpan.id = "nameHelp";
+  helpSpan.classList.add("help-block");
+  helpSpan.innerHTML = "test span";
   
   let createBtn = document.createElement("BUTTON");
   createBtn.classList.add("btn");
@@ -78,6 +75,7 @@ const drawCreateGame = () => {
   createBtn.innerHTML = "Create and Join Game";
   
   container.appendChild(newQuestionsBox);
+  container.appendChild(helpSpan);
   container.appendChild(createBtn);
   
   contentBox.appendChild(container);

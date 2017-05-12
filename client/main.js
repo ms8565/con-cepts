@@ -86,13 +86,29 @@ const onAnswerSubmit = () => {
 };
 
 
-const checkCreateRoom = () => {
-  
-};
-
 const checkJoinRoom = () => {
+    let roomInput = document.querySelector("#roomName").value;
+    let usernameInput = document.querySelector("#userName").value;
+    socket.emit('checkJoin', { roomName: roomInput, userName: usernameInput});
+}
+const checkCreateRoom = () => {
+    let roomInput = document.querySelector("#roomName").value;
+    let usernameInput = document.querySelector("#userName").value;
   
-};
+    //get all questions and answers
+    let qaElements = document.getElementsByClassName("new-qa");
+    let QAs = [];
+    for(let i = 0; i < qaElements.length; i++){
+      let question = qaElements[i].getElementsByClassName("new-question")[0];
+      let answer = qaElements[i].getElementsByClassName("new-answer")[0];
+      QAs.push({question: question.value, answer: answer.value});
+    }
+  console.log(QAs);
+    if(QAs.length > 0){
+       socket.emit('checkCreate', { roomName: roomInput, userName: usernameInput, rounds: QAs});
+    }
+   
+}
 
 
 const setupCanvas = () => {
@@ -104,10 +120,19 @@ const init = () => {
   document.getElementById("createBtn").onclick = function(){
     changeState(APP_STATES.CREATE_GAME);
   }
+  document.getElementById("joinBtn").onclick = checkJoinRoom;
   
   socket = io.connect();
+  
+  setupSocket();
 
-  socket.on('joined', (data) => {
+
+    
+    
+};
+
+const setupSocket = () => {
+    socket.on('joinRoom', (data) => {
     addUser(data.hash);
       if(data.currentState == 6){
           changeState(APP_STATES.ROUND_WAIT);
@@ -115,7 +140,11 @@ const init = () => {
       else{
        // changeState(APP_STATES.LOGIN_WAIT);
       }
-  }); 
+  });
+    socket.on('denyRoom', (data) => {
+        let errorText = document.querySelector("#error-text");
+        errorText.innerHTML = data.message;
+    });
     
   socket.on('drawRound', (data) =>{
       answers = data.answers;
@@ -129,9 +158,7 @@ const init = () => {
       console.log("data hash: " + data.hash + ", this hash: " + hash);
       if(data.hash == hash || data.hash == null) changeState(data.newState, data);
   });
-    
-    
-};
+}
 
 
 

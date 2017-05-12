@@ -14,6 +14,8 @@ const Answer = require('./classes/Answer.js');
 // List of player rooms
 const rooms = {};
 
+
+
 // our socketio instance
 let io;
 
@@ -215,17 +217,49 @@ const setupSockets = (ioServer) => {
     // add the id to the user's socket object for quick reference
     socket.hash = hash;
 
-    addUserToRoom(socket);
+    //addUserToRoom(socket);
 
-    socket.join(socket.roomName);
+    //socket.join(socket.roomName);
 
-    const room = rooms[socket.roomName];
-    room.numUsers++;
+    //const room = rooms[socket.roomName];
+    //room.numUsers++;
     // create a new character and store it by its unique id
-    room.players[hash] = new Player(hash);
+    //room.players[hash] = new Player(hash);
     // emit joined event to the user
-    const joinData = { hash: room.players[hash], currentState };
+    
+    const joinData = { player: room.players[hash], currentState };
+    
     socket.emit('joined', joinData);
+    
+    socket.on('checkJoin', (data) => {
+      if (data.roomName in rooms ) {
+        socket.roomName = data.roomName;
+        socket.name = data.userName;
+        rooms[socket.roomName].addUser(socket);
+        
+        const joinData = { 
+          player: room.players[hash],
+          roomName: data.roomName, 
+          userName: socket.name;
+          currentState };
+        
+        socket.emit('joinRoom', { joinData });
+      } else {
+        socket.emit('denyRoom', { message: 'Room does not exist' });
+      }
+    });
+    socket.on('checkCreate', (data) => {
+      if (!(data.roomName in rooms)) {
+        rooms[data.roomName] = room.createRoom(data.roomName);
+        socket.roomName = data.roomName;
+        socket.name = data.userName;
+
+        Room.addUser(socket, rooms[socket.roomName];
+        socket.emit('joinRoom', { roomName: data.roomName });
+      } else {
+        socket.emit('denyRoom', { message: 'Room already exists' });
+      }
+    });
 
     socket.on('chooseAnswerNum', (data) => {
       if (currentState !== APP_STATES.GAME_END && currentState !== APP_STATES.FINAL_RESULT) {

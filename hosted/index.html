@@ -74,15 +74,17 @@
       
       <div id="state-content">
         <div class="form-inline">
-          <input id="roomNameField" class="form-control" type="text" placeholder="Room Name">
-          <input id="userNameField" class="form-control" type="text" placeholder="Your Name">
+          <input id="roomName" class="form-control" type="text" placeholder="Room Name">
+          <input id="userName" class="form-control" type="text" placeholder="Your Name">
           <input class="btn btn-custom" id="joinBtn" type="button" value="Join Game">
+          <div class="form-group" id="roomNameGroup">
+          <span id="nameHelp" class="help-block">Example block-level help text here.</span>
         </div>
         <h3><span style="font-family: 'Bungee',sans-serif; color: #068281;">OR</span></h3>
-        <input class="btn btn-custom btn-lg" id="createBtn" type="button" value="Create Game">
+        
       </div>
-      
-
+      <input id="createBtn" type="button" class="btn btn-custom  btn-lg btn-block" value="Create Room">
+      </div>
       <footer class="footer">
         <p>&copy; 2017 Madison Smith, Chris Granville.</p>
       </footer>
