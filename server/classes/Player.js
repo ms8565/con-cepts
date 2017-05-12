@@ -10,10 +10,8 @@ class Player {
     // last time this character was updated
     this.lastUpdate = new Date().getTime();
 
-    // random number array for final round
-    this.randNums = [];
     // level of final round they are on
-    this.finalRoundNum = 0;
+    this.finalRoundNum = 1;
     this.socket = sock;
   }
 }
