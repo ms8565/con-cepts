@@ -219,7 +219,10 @@ const drawRoundWait = () => {
 
 //Display submitted choices and allow player to choose one
 const drawShowChoices = (question, answers) => {
-  
+  //add question
+  let questionElement = document.querySelector('#question');
+    questionElement.innerHTML = question;
+    
   //Add all of the answer buttons
   let answersElement = document.querySelector('#answers');
   answersElement.innerHTML = "";
