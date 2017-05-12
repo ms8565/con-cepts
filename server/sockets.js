@@ -242,6 +242,7 @@ const setupSockets = (ioServer) => {
           console.log("final turns left: "+room.finalTurns);
         const player = room.players[socket.hash];
         if (player.finalRoundNum < rounds.length) {
+          if(data.question != rounds[player.finalRoundNum].correctIndex) {player.finalRoundNum--; room.finalTurns++;}
           const currentQuestion = rounds[player.finalRoundNum].question;
           const currentAnswers = rounds[player.finalRoundNum].answers;
 
