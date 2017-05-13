@@ -43,7 +43,7 @@ body{
   display:block;
   margin: 1em 0 1em 0;
   color: #fff;
-  background-color: #337ab7;
+  //background-color: #337ab7;
   border-color: #2e6da4;
   width:100%;
   padding-top: .75em;
@@ -111,6 +111,28 @@ h4{
   background-color: #FEDC3D;
   margin-bottom: 1.5em;
   border-bottom: 3px solid #d2b118;
+}
+
+.loader {
+    margin-left: 340px;
+    border: 16px solid #f3f3f3;
+  border-radius: 50%;
+ border-top: 16px solid #FEDC3D;
+ border-right: 16px solid #01ABAA;
+ border-bottom: 16px solid #ffded1;
+ border-left: 16px solid #000000;
+    width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
  .navbar-inverse .navbar-brand{
