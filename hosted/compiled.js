@@ -138,19 +138,38 @@ var deleteQA = function deleteQA(element) {
   element.parentNode.removeChild(element);
 };
 
-var drawLoginWait = function drawLoginWait() {
+var updateWaitingUsers = function updateWaitingUsers() {
+  var playerBox = document.getElementById("current-users");
+  for (var i = 0; i < players.length; i++) {
+    var header = document.createElement("h4");
+    header.appendChild(document.createTextNode(players[i].name));
+    playerBox.appendChild(header);
+  }
+};
+var test = 0;
+
+var drawLoginWait = function drawLoginWait(roomName) {
   console.log('test');
   var contentBox = document.querySelector('#state-content');
   //Clear content box
   contentBox.innerHTML = "";
 
+  var header = document.createElement("h3");
+  header.appendChild(document.createTextNode("Players in " + roomName));
+
+  var playerBox = document.createElement("div");
+  playerBox.id = "current-users";
+
   //Add start button
   var startBtn = document.createElement("BUTTON");
   startBtn.classList.add("btn");
   startBtn.classList.add("btn-lg");
+  startBtn.classList.add("btn-custom");
   startBtn.addEventListener("click", onStartClick);
   startBtn.innerHTML = "START GAME";
 
+  contentBox.appendChild(header);
+  contentBox.appendChild(playerBox);
   contentBox.appendChild(startBtn);
 };
 
@@ -295,7 +314,7 @@ var changeState = function changeState(newState, data) {
 
   switch (currentState) {
     case APP_STATES.LOGIN_WAIT:
-      drawLoginWait();
+      drawLoginWait(data.roomName);
       break;
     case APP_STATES.CREATE_GAME:
       console.log("check");
@@ -381,7 +400,7 @@ var setupCanvas = function setupCanvas() {
 };
 
 var init = function init() {
-  document.getElementById("createBtn").onclick = function () {
+  document.getElementById("createFormBtn").onclick = function () {
     changeState(APP_STATES.CREATE_GAME);
   };
   document.getElementById("joinBtn").onclick = checkJoinRoom;
@@ -393,16 +412,22 @@ var init = function init() {
 
 var setupSocket = function setupSocket() {
   socket.on('joinRoom', function (data) {
-    addUser(data.hash);
+    //addUser(data.player);
+    players.push(data.player);
+    console.log("joining: " + data.roomName);
     if (data.currentState == 6) {
       changeState(APP_STATES.ROUND_WAIT);
     } else {
-      // changeState(APP_STATES.LOGIN_WAIT);
+      changeState(APP_STATES.LOGIN_WAIT, data);
     }
   });
   socket.on('denyRoom', function (data) {
-    var errorText = document.querySelector("#error-text");
+    var errorText = document.querySelector("#nameHelp");
     errorText.innerHTML = data.message;
+  });
+  socket.on('addOtherPlayer', function (data) {
+    players.push(data.otherPlayer);
+    updateWaitingUsers();
   });
 
   socket.on('drawRound', function (data) {
@@ -423,6 +448,6 @@ window.onload = init;
 "use strict";
 
 var addUser = function addUser(data) {
-  hash = data.hash;
-  players[hash] = data;
+  //hash = data.player;
+  //players[hash] = data;
 };

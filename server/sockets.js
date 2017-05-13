@@ -227,35 +227,44 @@ const setupSockets = (ioServer) => {
     //room.players[hash] = new Player(hash);
     // emit joined event to the user
     
-    const joinData = { player: room.players[hash], currentState };
+    //const joinData = { player: room.players[hash], currentState };
     
-    socket.emit('joined', joinData);
+    //socket.emit('joined', joinData);
     
     socket.on('checkJoin', (data) => {
       if (data.roomName in rooms ) {
         socket.roomName = data.roomName;
         socket.name = data.userName;
-        rooms[socket.roomName].addUser(socket);
+        Room.addUser(socket, rooms[socket.roomName]);
         
         const joinData = { 
-          player: room.players[hash],
+          player: rooms[socket.roomName].players[hash],
           roomName: data.roomName, 
-          userName: socket.name;
+          userName: socket.name,
           currentState };
         
-        socket.emit('joinRoom', { joinData });
+        socket.emit('joinRoom', joinData );
+        socket.broadcast.emit('addOtherPlayer', {player: rooms[socket.roomName].players[hash]});
       } else {
         socket.emit('denyRoom', { message: 'Room does not exist' });
       }
     });
     socket.on('checkCreate', (data) => {
       if (!(data.roomName in rooms)) {
-        rooms[data.roomName] = room.createRoom(data.roomName);
+        rooms[data.roomName] = new Room(data.roomName);
         socket.roomName = data.roomName;
         socket.name = data.userName;
 
-        Room.addUser(socket, rooms[socket.roomName];
-        socket.emit('joinRoom', { roomName: data.roomName });
+        Room.addUser(socket, rooms[socket.roomName]);
+        
+        console.log("roomName: "+socket.roomName);
+        
+        const joinData = { 
+          player: rooms[socket.roomName].players[hash],
+          roomName: socket.roomName, 
+          userName: socket.name,
+          currentState };
+        socket.emit('joinRoom', joinData);
       } else {
         socket.emit('denyRoom', { message: 'Room already exists' });
       }
@@ -326,6 +335,7 @@ const setupSockets = (ioServer) => {
     });
 
     socket.on('disconnect', () => {
+      const room = rooms[socket.roomName];
       io.sockets.in(socket.roomName).emit('left', room.players[socket.hash]);
       console.log(`round num: ${currentState}`);
 

@@ -1,4 +1,8 @@
 'use strict';
+
+// Player class
+const Player = require('./Player.js');
+
 class Room {
   constructor(name) {
     this.name = name;
@@ -12,11 +16,14 @@ class Room {
 const addUser = (sock, room) => {
   const socket = sock;
   socket.join(room);
+  room.players[socket.hash] = new Player(socket.hash);
   room.numUsers += 1;
 }
-const removeUser = (sock, room) {
+const removeUser = (sock, room) => {
   const socket = sock;
   socket.leave(room);
+  
+  delete players[socket.hash];
 
   if (room.numUsers <= 0) {
     return true;

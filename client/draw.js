@@ -84,6 +84,8 @@ const drawCreateGame = () => {
 };
 
 
+
+
 const addQA = () => {
   let newQuestionBox = document.createElement("div");
   newQuestionBox.classList.add("new-qa");
@@ -144,19 +146,38 @@ const deleteQA = (element) => {
   element.parentNode.removeChild(element);
 };
 
-const drawLoginWait = () => {
+const updateWaitingUsers = () => {
+  let playerBox = document.getElementById("current-users");
+  for(let i = 0; i < players.length; i++){
+    let header = document.createElement("h4");
+    header.appendChild(document.createTextNode(players[i].name));
+    playerBox.appendChild(header);
+  }
+}
+let test = 0;
+
+const drawLoginWait = (roomName) => {
   console.log('test');
   let contentBox = document.querySelector('#state-content');
   //Clear content box
   contentBox.innerHTML = "";
   
+  let header = document.createElement("h3");
+  header.appendChild(document.createTextNode("Players in " + roomName));
+  
+  let playerBox = document.createElement("div");
+  playerBox.id = "current-users";
+  
   //Add start button
   let startBtn = document.createElement("BUTTON");
   startBtn.classList.add("btn");
   startBtn.classList.add("btn-lg");
+  startBtn.classList.add("btn-custom");
   startBtn.addEventListener("click",onStartClick);
   startBtn.innerHTML = "START GAME";
   
+  contentBox.appendChild(header);
+  contentBox.appendChild(playerBox);
   contentBox.appendChild(startBtn);
 };
 

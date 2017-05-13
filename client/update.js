@@ -1,4 +1,4 @@
 const addUser = (data) => {
-  hash = data.hash;
-  players[hash] = data;
+  //hash = data.player;
+  //players[hash] = data;
 };

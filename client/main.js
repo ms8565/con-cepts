@@ -28,7 +28,7 @@ const changeState = (newState, data) => {
   
   switch(currentState){
     case APP_STATES.LOGIN_WAIT:
-      drawLoginWait();
+      drawLoginWait(data.roomName);
       break;
     case APP_STATES.CREATE_GAME:
       console.log("check");
@@ -117,7 +117,7 @@ const setupCanvas = () => {
 }
 
 const init = () => {
-  document.getElementById("createBtn").onclick = function(){
+  document.getElementById("createFormBtn").onclick = function(){
     changeState(APP_STATES.CREATE_GAME);
   }
   document.getElementById("joinBtn").onclick = checkJoinRoom;
@@ -133,17 +133,23 @@ const init = () => {
 
 const setupSocket = () => {
     socket.on('joinRoom', (data) => {
-    addUser(data.hash);
+    //addUser(data.player);
+    players.push(data.player);
+      console.log("joining: "+data.roomName);
       if(data.currentState == 6){
           changeState(APP_STATES.ROUND_WAIT);
       }
       else{
-       // changeState(APP_STATES.LOGIN_WAIT);
+        changeState(APP_STATES.LOGIN_WAIT, data);
       }
-  });
+    });
     socket.on('denyRoom', (data) => {
-        let errorText = document.querySelector("#error-text");
+        let errorText = document.querySelector("#nameHelp");
         errorText.innerHTML = data.message;
+    });
+    socket.on('addOtherPlayer', (data) => {
+      players.push(data.otherPlayer);
+      updateWaitingUsers();
     });
     
   socket.on('drawRound', (data) =>{
