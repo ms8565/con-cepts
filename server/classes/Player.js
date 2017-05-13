@@ -1,4 +1,4 @@
-'use strict';
+
 
 // Player class
 class Player {

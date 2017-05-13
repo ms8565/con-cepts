@@ -47,13 +47,13 @@ const changeState = (newState, data) => {
       drawRoundEnd(data.answers, data.players);
       break;
     case APP_STATES.SHOW_CHOICES:
-      drawShowChoices(data.question, data.answers);
+      drawShowChoices(data);
       break;
     case APP_STATES.GAME_END:
-      drawGameEnd();
+      drawGameEnd(data.players);
       break;
     case APP_STATES.FINAL_RESULT:
-        drawFinalResult(data.players);
+        drawGameEnd(data.players);
         break;
   }
 };
@@ -102,7 +102,7 @@ const setupCanvas = () => {
 
 const init = () => {
   document.getElementById("createBtn").onclick = function(){
-    changeState(APP_STATES.CREATE_GAME);
+    changeState(APP_STATES.LOGIN_WAIT);
   }
   
   socket = io.connect();
