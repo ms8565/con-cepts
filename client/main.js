@@ -102,7 +102,7 @@ const setupCanvas = () => {
 
 const init = () => {
   document.getElementById("createBtn").onclick = function(){
-    changeState(APP_STATES.LOGIN_WAIT);
+    changeState(APP_STATES.CREATE_GAME);
   }
   
   socket = io.connect();

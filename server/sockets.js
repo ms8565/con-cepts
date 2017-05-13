@@ -52,7 +52,7 @@ const APP_STATES = {
   FINAL_RESULT: 9,
 };
 
-let currentState = APP_STATES.LOGIN_WAIT;
+let currentState = APP_STATES.GAME_START;
 
 const changeState = (newState, socket) => {
   currentState = newState;
@@ -152,7 +152,7 @@ const changeState = (newState, socket) => {
     case APP_STATES.FINAL_RESULT: {
       data = {
         newState: APP_STATES.FINAL_RESULT,
-        players: rooms.room1.players
+        players: rooms.room1.players,
       };
       io.sockets.in('room1').emit('changeState', data);
       break;
@@ -261,7 +261,7 @@ const setupSockets = (ioServer) => {
                 // Get authorless answers
           const choices = currentAnswers.map((answer) => answer.text);
           const progress = (player.finalRoundNum / rounds.length) * 100;
-            console.log("progress " + progress);
+          console.log(`progress ${progress}`);
           const send = { newState: APP_STATES.SHOW_CHOICES,
             question: currentQuestion, answers: choices, hash, progress };
           socket.emit('changeState', send);
