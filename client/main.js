@@ -47,13 +47,13 @@ const changeState = (newState, data) => {
       drawRoundEnd(data.answers, data.players);
       break;
     case APP_STATES.SHOW_CHOICES:
-      drawShowChoices(data.question, data.answers);
+      drawShowChoices(data);
       break;
     case APP_STATES.GAME_END:
-      drawGameEnd();
+      drawGameEnd(data.players);
       break;
     case APP_STATES.FINAL_RESULT:
-        drawFinalResult(data.players);
+        drawGameEnd(data.players);
         break;
   }
 };

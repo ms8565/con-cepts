@@ -1,4 +1,4 @@
-'use strict';
+
 
 // fast hashing library
 const xxh = require('xxhashjs');
@@ -10,6 +10,8 @@ const Room = require('./classes/Room.js');
 const Round = require('./classes/Round.js');
 // Answer class
 const Answer = require('./classes/Answer.js');
+// Array Randomizer
+const randomize = require('./randomize.js');
 
 // List of player rooms
 const rooms = {};
@@ -40,22 +42,6 @@ rounds.push(new Round('Die Geschichte vom Daumenlutscher?',
                       'in schnellem Lauf Springt der Schneider'));
 */
 
-// get rid of non-unique values in array
-const unique = (e, index, self) => self.indexOf(e) === index;
-
-const randomArray = () => {
-  let randAr = [];
-    // loop until there is a random number for every round
-  while (randAr.length < rounds.length) {
-    for (let i = 0; i < rounds.length; i++) {
-      randAr[i] = Math.floor(Math.random() * (rounds.length + 1));
-    }
-    // make sure they're unique
-    randAr = randAr.filter(unique);
-  }
-  return randAr;
-};
-
 const APP_STATES = {
   LOGIN: 1,
   LOGIN_WAIT: 2,
@@ -65,17 +51,17 @@ const APP_STATES = {
   SHOW_CHOICES: 6,
   ROUND_END: 7,
   GAME_END: 8,
-  FINAL_RESULT: 9
+  FINAL_RESULT: 9,
 };
 
-let currentState = APP_STATES.LOGIN_WAIT;
+let currentState = APP_STATES.GAME_START;
 
 const changeState = (newState, socket) => {
   currentState = newState;
   console.log(`current state: ${currentState}`);
 
   const currentQuestion = rounds[currentRound].question;
-  const currentAnswers = rounds[currentRound].answers;
+  // const currentAnswers = rounds[currentRound].answers;
 
   let data;
 
@@ -128,8 +114,18 @@ const changeState = (newState, socket) => {
       const newAnswer = new Answer('ANSWER', rounds[currentRound].correctAnswer);
       rounds[currentRound].answers.push(newAnswer);
 
-      // Get authorless answers
-      const choices = currentAnswers.map((answer) => answer.text);
+      rounds[currentRound].answers = randomize.randomizeArray(rounds[currentRound].answers);
+
+      rounds[currentRound].answers.forEach((e, index) => {
+        console.log(`answer: ${e.text}`);
+
+        if (e.text === rounds[currentRound].correctAnswer) {
+          console.log(`correct index: ${index}`);
+          rounds[currentRound].correctIndex = index;
+        }
+      });
+        // Get authorless answers
+      const choices = rounds[currentRound].answers.map((answer) => answer.text);
 
       // Send users the entered answers
       data = { newState: currentState, question: currentQuestion, answers: choices };
@@ -137,32 +133,32 @@ const changeState = (newState, socket) => {
       break;
     }
     case APP_STATES.GAME_END: {
-        const room = rooms.room1;
-        room.finalTurns = Object.keys(room.players).length * rounds.length;
-        console.log("final turns: "+Object.keys(room.players).length + ", rounds: " + rounds.length);
-        
-        room.randNums = randomArray();
-        const currentQ = rounds[0].question;
-        const currentA = rounds[0].answers;
+      const room = rooms.room1;
+      room.finalTurns = Object.keys(room.players).length * rounds.length;
+      console.log(`final turns: ${Object.keys(room.players).length}, rounds: ${rounds.length}`);
+
+        // room.randNums = randomArray();
+      const currentQ = rounds[0].question;
+      const currentA = rounds[0].answers;
 
         // Get authorless answers
-        const choices = currentA.map((answer) => answer.text);
-        data = { newState: APP_STATES.SHOW_CHOICES,
+      const choices = currentA.map((answer) => answer.text);
+      data = { newState: APP_STATES.SHOW_CHOICES,
         question: currentQ, answers: choices };
-        
-        console.log("Question: " + data.question);
-        io.sockets.in('room1').emit('changeState', data);
+
+      console.log(`Question: ${data.question}`);
+      io.sockets.in('room1').emit('changeState', data);
 
       break;
     }
-      case APP_STATES.FINAL_RESULT: {
+    case APP_STATES.FINAL_RESULT: {
       data = {
-        newState: APP_STATES.ROUND_END,
+        newState: APP_STATES.FINAL_RESULT,
         players: rooms.room1.players,
-          answers: rounds[currentRound].answers,
       };
       io.sockets.in('room1').emit('changeState', data);
-      }
+      break;
+    }
     default:
       break;
   }
@@ -277,33 +273,48 @@ const setupSockets = (ioServer) => {
         rounds[currentRound].unanswered--;
         if (rounds[currentRound].unanswered <= 0) changeState(APP_STATES.ROUND_END, socket);
         console.log(`choice: ${data.question}`);
-      } 
-        console.log("gameState: " + currentState);
+      }
+      console.log(`gameState: ${currentState}`);
       if (currentState === APP_STATES.GAME_END) {
-          console.log("Game End");
-          room.finalTurns--;
-          console.log("final turns left: "+room.finalTurns);
+        console.log('Game End');
+        room.finalTurns--;
+        console.log(`final turns left: ${room.finalTurns}`);
         const player = room.players[socket.hash];
+        console.log(`finalRoundNum: ${player.finalRoundNum}, rounds: ${rounds.length}`);
+        if (parseInt(data.question, 10) === rounds[player.finalRoundNum].correctIndex) {
+          console.log('correct!');
+          player.finalRoundNum++;
+          console.log(`finalRoundNum: ${player.finalRoundNum}, rounds: ${rounds.length}`);
+        } else {
+          room.finalTurns++;
+          console.log(`final turns left: ${room.finalTurns}`);
+        }
         if (player.finalRoundNum < rounds.length) {
-          if(data.question != rounds[player.finalRoundNum].correctIndex) {player.finalRoundNum--; room.finalTurns++;}
+            // console.log("correct index: "+rounds[player.finalRoundNum].correctIndex);
+          /* if(data.question != rounds[player.finalRoundNum].correctIndex) {
+              if(player.finalRoundNum > 0)player.finalRoundNum--;
+              room.finalTurns++;
+              console.log("failed, finalRoundNum: " + player.finalRoundNum);
+              console.log("finalRoundNum: " + Object.keys(rounds));
+          }*/
+
           const currentQuestion = rounds[player.finalRoundNum].question;
           const currentAnswers = rounds[player.finalRoundNum].answers;
 
                 // Get authorless answers
           const choices = currentAnswers.map((answer) => answer.text);
-
+          const progress = (player.finalRoundNum / rounds.length) * 100;
+          console.log(`progress ${progress}`);
           const send = { newState: APP_STATES.SHOW_CHOICES,
-            question: currentQuestion, answers: choices, hash: hash };
-          player.finalRoundNum++;
+            question: currentQuestion, answers: choices, hash, progress };
           socket.emit('changeState', send);
+        } else {
+          player.score += (Object.keys(room.players).length * 100) - (room.finalPlace * 100);
+          room.finalPlace++;
         }
-          else{
-              player.score += 500 - (room.finalPlace * 100);
-              room.finalPlace++;
-          }
-        if(room.finalTurns == 0){
-            console.log("final results");
-            changeState(APP_STATES.FINAL_RESULT);
+        if (room.finalTurns === 0) {
+          console.log('final results');
+          changeState(APP_STATES.FINAL_RESULT);
         }
       }
     });
