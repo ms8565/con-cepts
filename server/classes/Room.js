@@ -1,7 +1,3 @@
-
-// Player class
-const Player = require('./Player.js');
-
 class Room {
   constructor(name) {
     this.name = name;
