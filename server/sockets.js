@@ -16,6 +16,26 @@ const randomize = require('./randomize.js');
 // List of player rooms
 const rooms = {};
 
+const addUser = (sock, roomName) => {
+  const room = rooms[roomName];
+  const socket = sock;
+  socket.join(room);
+  room.players[socket.hash] = new Player(socket.hash);
+  room.numUsers += 1;
+};
+
+/* const removeUser = (sock, roomName) => {
+  const room = rooms[roomName];
+  const socket = sock;
+  socket.leave(room);
+
+  delete room.players[socket.hash];
+
+  if (room.numUsers <= 0) {
+    return true;
+  }
+  return false;
+};*/
 
 
 // our socketio instance
@@ -164,38 +184,6 @@ const changeState = (newState, socket) => {
   }
 };
 
-// Add new user to a room
-const addUserToRoom = (sock) => {
-  const socket = sock;
-
-  const roomName = 'room1';
-  socket.roomName = roomName;
-  if (rooms[roomName] == null) {
-    rooms[roomName] = new Room(roomName);
-  }
-  /* let added = false;
-
-  const keys = Object.keys(rooms);
-
-  for (let i = 0; i < keys.length; i++) {
-
-    // Check if a room has an open spot
-    if (rooms[keys[i]].numUsers < 2) {
-      socket.roomName = keys[i];
-      rooms[keys[i]].numUsers++;
-
-      added = true;
-    }
-  }
-  // If there weren't any rooms open, make a new one
-  if (!added) {
-    // create unqiue roomname based on time
-    const roomName = xxh.h32(`${new Date().getTime()}`, 0xCAFEBABE).toString(16);
-    socket.roomName = roomName;
-    rooms[roomName] = new Room(roomName);
-  }*/
-};
-
 // setup socket server
 const setupSockets = (ioServer) => {
   // set our io server instance
@@ -213,34 +201,21 @@ const setupSockets = (ioServer) => {
     // add the id to the user's socket object for quick reference
     socket.hash = hash;
 
-    //addUserToRoom(socket);
 
-    //socket.join(socket.roomName);
-
-    //const room = rooms[socket.roomName];
-    //room.numUsers++;
-    // create a new character and store it by its unique id
-    //room.players[hash] = new Player(hash);
-    // emit joined event to the user
-    
-    //const joinData = { player: room.players[hash], currentState };
-    
-    //socket.emit('joined', joinData);
-    
     socket.on('checkJoin', (data) => {
-      if (data.roomName in rooms ) {
+      if (data.roomName in rooms) {
         socket.roomName = data.roomName;
         socket.name = data.userName;
-        Room.addUser(socket, rooms[socket.roomName]);
-        
-        const joinData = { 
+        addUser(socket, socket.roomName);
+
+        const joinData = {
           player: rooms[socket.roomName].players[hash],
-          roomName: data.roomName, 
+          roomName: data.roomName,
           userName: socket.name,
           currentState };
-        
-        socket.emit('joinRoom', joinData );
-        socket.broadcast.emit('addOtherPlayer', {player: rooms[socket.roomName].players[hash]});
+
+        socket.emit('joinRoom', joinData);
+        socket.broadcast.emit('addOtherPlayer', { player: rooms[socket.roomName].players[hash] });
       } else {
         socket.emit('denyRoom', { message: 'Room does not exist' });
       }
@@ -251,13 +226,13 @@ const setupSockets = (ioServer) => {
         socket.roomName = data.roomName;
         socket.name = data.userName;
 
-        Room.addUser(socket, rooms[socket.roomName]);
-        
-        console.log("roomName: "+socket.roomName);
-        
-        const joinData = { 
+        addUser(socket, socket.roomName);
+
+        console.log(`roomName: ${socket.roomName}`);
+
+        const joinData = {
           player: rooms[socket.roomName].players[hash],
-          roomName: socket.roomName, 
+          roomName: socket.roomName,
           userName: socket.name,
           currentState };
         socket.emit('joinRoom', joinData);
@@ -276,6 +251,7 @@ const setupSockets = (ioServer) => {
       }
       console.log(`gameState: ${currentState}`);
       if (currentState === APP_STATES.GAME_END) {
+        const room = rooms[socket.roomName];
         console.log('Game End');
         room.finalTurns--;
         console.log(`final turns left: ${room.finalTurns}`);
@@ -332,7 +308,7 @@ const setupSockets = (ioServer) => {
         const answer = new Answer(socket.hash, data.answer);
         rounds[currentRound].answers.push(answer);
         rounds[currentRound].unanswered++;
-        if (rounds[currentRound].unanswered === room.numUsers) {
+        if (rounds[currentRound].unanswered === rooms[socket.roomName].numUsers) {
           changeState(APP_STATES.SHOW_CHOICES);
         } else {
               // Wait for other players to finish

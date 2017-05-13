@@ -51,6 +51,7 @@ var drawCreateGame = function drawCreateGame() {
   var addQABtn = document.createElement("BUTTON");
   addQABtn.classList.add("btn");
   addQABtn.classList.add("btn-default");
+  addQABtn.classList.add("btn-custom");
   addQABtn.id = "addQABtn";
   addQABtn.addEventListener("click", addQA);
   addQABtn.innerHTML = "Add Question";
@@ -115,6 +116,7 @@ var addQA = function addQA() {
   var deleteQABtn = document.createElement("BUTTON");
   deleteQABtn.classList.add("btn");
   deleteQABtn.classList.add("btn-danger");
+  deleteQABtn.classList.add("btn-custom");
   deleteQABtn.addEventListener("click", function () {
     document.getElementById("new-questions").removeChild(newQuestionBox);
   });
@@ -208,6 +210,7 @@ var drawRoundStart = function drawRoundStart(question) {
   var submitBtn = document.createElement("BUTTON");
   submitBtn.classList.add("btn");
   submitBtn.classList.add("btn-lg");
+  submitBtn.classList.add("btn-custom");
   submitBtn.addEventListener("click", onAnswerSubmit);
   submitBtn.innerHTML = "SUBMIT";
   answersElement.appendChild(submitBtn);
@@ -218,18 +221,31 @@ var drawRoundStart = function drawRoundStart(question) {
 //Display waiting screen while other players answer
 var drawRoundWait = function drawRoundWait() {
   var contentBox = document.querySelector('#answers');
+  var content = document.querySelector('#state-content');
   if (contentBox == null) {
-    var content = document.querySelector('#state-content');
     var answersElement = document.createElement("div");
     answersElement.setAttribute("id", "answers");
     content.appendChild(answersElement);
     contentBox = document.querySelector('#answers');
   }
+  if (document.querySelector(".loader") == null) {
+    var wheel = document.createElement("div");
+    wheel.setAttribute("class", "loader");
+    content.appendChild(wheel);
+  }
   contentBox.innerHTML = "PLEASE WAIT FOR ROUND TO FINISH";
 };
 
 //Display submitted choices and allow player to choose one
-var drawShowChoices = function drawShowChoices(question, answers) {
+var drawShowChoices = function drawShowChoices(data) {
+  if (document.querySelector(".loader") != null) {
+    document.querySelector(".loader").setAttribute("class", "");
+  }
+  //add question
+  var question = data.question;
+  var answers = data.answers;
+  var questionElement = document.querySelector('#question');
+  questionElement.innerHTML = question;
 
   //Add all of the answer buttons
   var answersElement = document.querySelector('#answers');
@@ -241,6 +257,7 @@ var drawShowChoices = function drawShowChoices(question, answers) {
     //Create styling
     answerBtn.classList.add("btn");
     answerBtn.classList.add("btn-lg");
+    answerBtn.classList.add("btn-custom");
     answerBtn.classList.add("answer-btn");
 
     answerBtn.innerHTML = answers[i];
@@ -250,6 +267,27 @@ var drawShowChoices = function drawShowChoices(question, answers) {
 
     answersElement.appendChild(answerBtn);
   }
+
+  //final round progress
+  /*let progWrap;
+  let progBar;
+  if(data.progress != null){
+      if(document.querySelector(".progress") == null){
+      let content = document.querySelector('#state-content');
+      let progWrap = document.createElement("div");
+      progWrap.classList.add("progress");
+      let progBar = document.createElement("div");
+      progBar.classList.add("progress-bar");
+      progBar.setAttribute("role", "progressbar");
+      }
+      else{
+          progWrap = document.querySelector(".progress");
+          progBar = document.querySelector(".progress-bar");
+      }
+        progBar.style.width = data.progress+"%";
+      progWrap.appendChild(progBar);
+      content.appendChild(progWrap);
+    }*/
 };
 
 //Display correct answer and player points
@@ -274,7 +312,19 @@ var drawRoundEnd = function drawRoundEnd(answers, players) {
 };
 
 //Display player point totals
-var drawGameEnd = function drawGameEnd() {};
+var drawGameEnd = function drawGameEnd(players) {
+  var questionElement = document.querySelector('#question');
+  questionElement.innerHTML = "FINAL RESULTS";
+  var answersElement = document.querySelector('#answers');
+  answersElement.innerHTML = "";
+
+  console.log('players: ' + JSON.stringify(players));
+  var keys = Object.keys(players);
+  for (var i = 0; i < keys.length; i++) {
+    var player = players[keys[i]];
+    answersElement.innerHTML += "<h4>" + player.hash + ": " + player.score + " points</h4>";
+  }
+};
 
 //looping with requestAnimationFrame
 var drawContinuous = function drawContinuous(time) {
@@ -333,13 +383,13 @@ var changeState = function changeState(newState, data) {
       drawRoundEnd(data.answers, data.players);
       break;
     case APP_STATES.SHOW_CHOICES:
-      drawShowChoices(data.question, data.answers);
+      drawShowChoices(data);
       break;
     case APP_STATES.GAME_END:
-      drawGameEnd();
+      drawGameEnd(data.players);
       break;
     case APP_STATES.FINAL_RESULT:
-      drawFinalResult(data.players);
+      drawGameEnd(data.players);
       break;
   }
 };
